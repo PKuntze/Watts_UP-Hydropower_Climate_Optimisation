@@ -1,0 +1,36 @@
+# Streamlit local configs
+.streamlit/
+
+# Local/external duplicates (do not track)
+../Streamlit_App/
+../data/Climate Data/
+
+# Temporary or generated files
+assets/
+.gitignore.save
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db.streamlit/
+assets/
+assets/
+../Streamlit_App/
+../data/Climate Data/
+# macOS
+.DS_Store
+
+# Streamlit local config (DO NOT TRACK)
+.streamlit/
+
+# Temporary or local assets (adjust based on need)
+assets/
+__pycache__/
+*.pyc
+
+# External paths (avoid accidentally adding parent folders)
+../Streamlit_App/
+../data/Climate Data/
+
+# Optional: if you ever generate logs or temp files
+*.log
+tmp/
