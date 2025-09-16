@@ -9,6 +9,9 @@ import seaborn as sns
 import plotly.express as px
 import sys
 from PIL import Image  # Pillow library
+import os
+
+# Streamlit theme configuration should be set in .streamlit/config.toml, not in Python code.
 
 # LOAD Data: merged Table - ANN output + historical data --> @Bernd
 
@@ -24,7 +27,7 @@ from PIL import Image  # Pillow library
 # ------------------------------
 # LOAD DATA
 # ------------------------------
-data_path = "Streamlit/Streamlit_Input.csv" #depending on the unzipped csv file, path to be changed.
+data_path = "/Users/noeespinosa/Documents/10-Data-analysis/00-capstone-project/Watts_UP-Hydropower_Climate_Optimisation/Watts_UP-Hydropower_Climate_Optimisation/Streamlit/data/Streamlit_Input.csv" #depending on the unzipped csv file, path to be changed.
 df = pd.read_csv(data_path)
 
 # Clean column names
@@ -134,18 +137,67 @@ else:
 # ------------------------------
 # MAIN CONTENT
 # ------------------------------
-st.title("⚡Watt’s Up, Kalam?⚡")
+# --- HEADER: App Title ---
+st.markdown("<h1 style='text-align: center; color: darkseagreen;'>⚡Watt’s Up, Kalam?⚡</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 18px; color: #555;'>Hydropower & Climate Optimization Dashboard</p>", unsafe_allow_html=True)
 st.write("Select an ID and a date from the sidebar to see the power consumption and daily weather summary.")
-
-
-### Section: Main Page
-
-# Let's give a title
-st.title("⚡Watt’s Up, Kalam?⚡")
 
 # Subtitle: "Kalam - Swat District of the Khyber Pakhtunkhwa province, Pakistan
 
 # (Interactive) Show Pictures via sliders    --> @Noé 
+st.subheader("📸 Kalam Gallery: Photo Tour")
+
+# Path to your images folder
+image_folder = "Images"
+image_files = ["hiking.jpg", "Kalam_day.jpg", "Kalam_sunset.jpg", "Kalam-Valley.jpg", 
+               "kalam1.jpg", "lake.jpg", "lake1.jpg", "mountain1.jpg", "rapids.jpg", "flow_of_water.jpg", "micro_hydro_powerplat.jpg", "people_working.jpg"]  # Add more filenames as needed
+image_paths = [os.path.join(image_folder, f) for f in image_files]
+captions = [
+    "Hiking view in Kalam",
+    "Kalam during the day", 
+    "Kalam during sunset",
+    "Beautiful Kalam Valley Landscape",
+    "Kalam mountains", 
+    "Lake Mahodand",
+    "Lake Mahodand", 
+    "Mountain Falak Sar", 
+    "Rapids in Kalam", 
+    "flow_of_water.jpg", 
+    "micro_hydro_powerplat.jpg", 
+    "people_working.jpg"
+]
+
+# Initialize session state for image index
+if 'image_index' not in st.session_state:
+    st.session_state.image_index = 0
+
+# Function to go to next image
+def next_image():
+    st.session_state.image_index = (st.session_state.image_index + 1) % len(image_paths)
+
+# Function to go to previous image
+def prev_image():
+    st.session_state.image_index = (st.session_state.image_index - 1) % len(image_paths)
+
+# Get current image and caption
+current_index = st.session_state.image_index
+img = Image.open(image_paths[current_index])
+caption = captions[current_index]
+
+# Display image
+st.image(img, caption=f"{caption} ({current_index + 1}/{len(image_paths)})", width=None)
+
+# Navigation buttons
+col1, col2, col3 = st.columns([1, 6, 1])
+
+with col1:
+    if st.button("⬅️"):
+        prev_image()
+
+with col3:
+    if st.button("➡️"):
+        next_image()
+
 
 #Visualize: Historical vs Prediction 
 
