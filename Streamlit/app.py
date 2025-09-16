@@ -12,12 +12,6 @@ from PIL import Image  # Pillow library
 
 # LOAD Data: merged Table - ANN output + historical data --> @Bernd
 
-# Let's give a title
-st.title("⚡Watt’s Up, Kalam?⚡")
-
-# Subtitle: "Kalam - Swat District of the Khyber Pakhtunkhwa province, Pakistan
-
-# (Interactive) Show Pictures via sliders    --> @Noé 
 
 ### Section: Left Sidebar
 
@@ -30,6 +24,13 @@ st.title("⚡Watt’s Up, Kalam?⚡")
 
 
 ### Section: Main Page
+
+# Let's give a title
+st.title("⚡Watt’s Up, Kalam?⚡")
+
+# Subtitle: "Kalam - Swat District of the Khyber Pakhtunkhwa province, Pakistan
+
+# (Interactive) Show Pictures via sliders    --> @Noé 
 
 #Visualize: Historical vs Prediction 
 
