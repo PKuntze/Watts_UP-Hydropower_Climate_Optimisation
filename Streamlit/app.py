@@ -24,7 +24,7 @@ from PIL import Image  # Pillow library
 # ------------------------------
 # LOAD DATA
 # ------------------------------
-data_path = "Streamlit/Streamlit_Input.csv" #depending on the unzipped csv file path to be changed
+data_path = "Streamlit/Streamlit_Input.csv" #depending on the unzipped csv file, path to be changed.
 df = pd.read_csv(data_path)
 
 # Clean column names
@@ -42,13 +42,13 @@ df["ds"] = df["Date"]
 # ------------------------------
 st.sidebar.header("Select Options")
 
-# 1️⃣ Select ID (formerly Source)
+# Select ID (formerly Source)
 selected_id = st.sidebar.selectbox("Select ID", df["ID"].unique())
 
 # Filter df for the selected ID
 df_id = df[df["ID"] == selected_id]
 
-# 2️⃣ Date selector
+# Date selector
 min_date = df_id["ds"].min().date()
 max_date = df_id["ds"].max().date()
 selected_date = st.sidebar.date_input(
