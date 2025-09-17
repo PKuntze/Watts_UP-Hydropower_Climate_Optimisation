@@ -219,8 +219,6 @@ animate_weather(df_selected[pd.to_datetime(df_selected['ds'])==pd.to_datetime(se
 
 #plot_clima(df_selected,selected_date_weather,'Snow Cover (%)_mean', 'purple')
 
-import streamlit as st
-
 st.header('Weather Forecast for the Next Week')
 
 tab1, tab2, tab3, tab4 = st.tabs(["Temperature", "Precipitation", "Snowfall", "Snow Cover"])
