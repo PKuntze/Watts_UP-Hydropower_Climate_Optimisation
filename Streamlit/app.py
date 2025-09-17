@@ -12,6 +12,12 @@ from PIL import Image  # Pillow library
 import os
 
 # Streamlit theme configuration should be set in .streamlit/config.toml, not in Python code.
+# Set page config
+st.set_page_config(
+    page_title="WATTSUP",
+    page_icon="💧",  # or upload a favicon
+    layout="centered"
+)
 
 # LOAD Data: merged Table - ANN output + historical data --> @Bernd
 
@@ -134,13 +140,18 @@ if not df_selected.empty:
 else:
     st.sidebar.warning("No weather data available for the selected ID and date.")
 
+
 # ------------------------------
 # MAIN CONTENT
 # ------------------------------
 # --- HEADER: App Title ---
-st.markdown("<h1 style='text-align: center; color: darkseagreen;'>⚡Watt’s Up, Kalam?⚡</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #00D4FF;'>⚡Watt’s Up, Kalam?⚡</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 18px; color: #555;'>Hydropower & Climate Optimization Dashboard</p>", unsafe_allow_html=True)
 st.write("Select an ID and a date from the sidebar to see the power consumption and daily weather summary.")
+
+import streamlit as st
+
+
 
 # Subtitle: "Kalam - Swat District of the Khyber Pakhtunkhwa province, Pakistan
 
@@ -185,7 +196,7 @@ img = Image.open(image_paths[current_index])
 caption = captions[current_index]
 
 # Display image
-st.image(img, caption=f"{caption} ({current_index + 1}/{len(image_paths)})", width=None)
+st.image(img, caption=f"{caption} ({current_index + 1}/{len(image_paths)})")
 
 # Navigation buttons
 col1, col2, col3 = st.columns([1, 6, 1])
