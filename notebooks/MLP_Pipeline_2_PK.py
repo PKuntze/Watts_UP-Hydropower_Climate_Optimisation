@@ -50,9 +50,9 @@ def model_id_and_folders(base_dir, model_id):
 
 BASEDIR = "/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/"
 MODELNAME = model_id_and_folders(BASEDIR, "FP_MonteCarlo_median")
-MC_MODE = 'mean'
+#MC_MODE = 'mean'
 MC_MODE = 'median'
-PREDICT_0_POWER = False
+#PREDICT_0_POWER = False
 
 DATA_CONSUMPTION = BASEDIR+"data/Data.csv"
 DATA_CLIMATE = BASEDIR+"data/Kalam_Climate_Data.xlsx"
@@ -399,9 +399,9 @@ def run_pipeline():
 
             # Monte Carlo Dropout predictions
             #mc_mean, mc_std = mc_dropout_predictions(model, X_ex, n_iter=50)
-            mc_mean, mc_std = mc_dropout_predictions_parallel(model, X_ex, n_iter=50, batch_size=10, reduction='median')
-            r["pred_kwh"] = max(0, mc_mean[0])
-            r["pred_std"] = mc_std[0]
+            central, spread = mc_dropout_predictions_parallel(model, X_ex, n_iter=50, batch_size=10, reduction=MC_MODE)
+            r["pred_kwh"] = max(0, central[0])
+            r["pred_std"] = spread[0]
 
             lag_hist = pd.concat([lag_hist, pd.DataFrame([{"kwh": r["pred_kwh"]}])], ignore_index=True)
             rows.append(r)
