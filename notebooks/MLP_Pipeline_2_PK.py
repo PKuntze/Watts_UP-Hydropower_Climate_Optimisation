@@ -49,11 +49,11 @@ def model_id_and_folders(base_dir, model_id):
     return model_id_i
 
 BASEDIR = "/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/"
-MODELNAME = model_id_and_folders(BASEDIR, "FP_MonteCarlo_mean_niter50")
 MC_MODE = 'mean'
 #MC_MODE = 'median'
-NITER = 50
+NITER = 100
 #PREDICT_0_POWER = False
+MODELNAME = model_id_and_folders(BASEDIR, "FP_MonteCarlo_{MC_MODE}_niter{NITER}")
 
 DATA_CONSUMPTION = BASEDIR+"data/Data.csv"
 DATA_CLIMATE = BASEDIR+"data/Kalam_Climate_Data.xlsx"
