@@ -49,9 +49,10 @@ def model_id_and_folders(base_dir, model_id):
     return model_id_i
 
 BASEDIR = "/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/"
-MODELNAME = model_id_and_folders(BASEDIR, "FP_MonteCarlo_median")
-#MC_MODE = 'mean'
-MC_MODE = 'median'
+MODELNAME = model_id_and_folders(BASEDIR, "FP_MonteCarlo_mean_niter50")
+MC_MODE = 'mean'
+#MC_MODE = 'median'
+NITER = 50
 #PREDICT_0_POWER = False
 
 DATA_CONSUMPTION = BASEDIR+"data/Data.csv"
@@ -399,7 +400,7 @@ def run_pipeline():
 
             # Monte Carlo Dropout predictions
             #mc_mean, mc_std = mc_dropout_predictions(model, X_ex, n_iter=50)
-            central, spread = mc_dropout_predictions_parallel(model, X_ex, n_iter=50, batch_size=10, reduction=MC_MODE)
+            central, spread = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=10, reduction=MC_MODE)
             r["pred_kwh"] = max(0, central[0])
             r["pred_std"] = spread[0]
 
