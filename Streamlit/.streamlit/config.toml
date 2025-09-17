@@ -1,0 +1,13 @@
+[theme]
+base="dark"
+primaryColor="#00D4FF"           # Bright cyan - matches text & network lines
+backgroundColor="#001F3F"        # Deep navy blue - matches background
+secondaryBackgroundColor="#00A8E6" # Medium teal - for highlights
+textColor="#FFFFFF"              # White text for readability
+baseRadius="full"
+
+[theme.sidebar]
+backgroundColor="#002C5C"        # Slightly lighter than main bg for depth
+secondaryBackgroundColor="#005B9C" # Matches dam color
+textColor="#FFFFFF"
+baseRadius="none"
