@@ -15,18 +15,40 @@ from streamlit_folium import st_folium
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 
-# LOAD Data: merged Table - ANN output + historical data --> @Bernd
-data_path="data/Streamlit_Input.csv"
-df= pd.read_csv(data_path)
+# ------------------------------
+# Set Page Layout
+# ------------------------------
 
-### Section: Left Sidebar
+st.set_page_config(
+    page_title="WattsUp – Micro-Hydro Forecasts",
+    page_icon="⚡",
+    layout="wide"
+)
 
-# LOGO   --> @ Florencia
+st.markdown(
+    """
+    <style>
+    /* Make main content use more width */
+    .block-container {
+        max-width: 95%;   /* increase/decrease overall width */
+        padding-left: 1rem;   /* tighter left margin */
+        padding-right: 1rem;  /* tighter right margin */
+    }
 
-# Select User ID (from list)    --> store this as userID 
-# Select Date (from calendar)   --> stor this as selected_date
+    /* Adjust sidebar width */
+    [data-testid="stSidebar"] {
+        min-width: 300px;   /* default ~250px, increase for readability */
+        max-width: 350px;   /* prevent it from getting too wide */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# Weather of the day --> @Gozal
+# Alternative:  Official command, can change between layout = "wide" or "centered" (default) 
+#st.set_page_config(layout="wide")  # makes content span more of the screen
+
+
 # ------------------------------
 # LOAD DATA
 # ------------------------------
@@ -36,8 +58,11 @@ df = pd.read_csv(data_path)
 # Clean column names
 df.columns = df.columns.str.strip()
 
+#split Source into two new columns for selectors
+df[["Device", "ID"]] = df["Source"].str.extract(r"^(consumer_device_\d+)_(data_user_\d+)$")
+
 # Rename 'Source' to 'ID'
-df.rename(columns={"Source": "ID"}, inplace=True)
+#df.rename(columns={"Source": "ID"}, inplace=True)
 
 # Ensure 'Date' column is datetime
 df["Date"] = pd.to_datetime(df["Date"])
@@ -46,13 +71,25 @@ df["ds"] = df["Date"]
 # ------------------------------
 # SIDEBAR / SELECTIONS
 # ------------------------------
-st.sidebar.header("Select Options")
+
+
+#Add Logo
+st.sidebar.image("images/logo_option_4.png", use_container_width=True) 
+
+st.sidebar.header("Check Your Energy Forecast")         #Previously "Select Options"
 
 # Select ID
-selected_id = st.sidebar.selectbox("Select ID", df["ID"].unique())
+#selected_id = st.sidebar.selectbox("Select ID", df["ID"].unique())
+
+# Sidebar selectors
+selected_device = st.sidebar.selectbox("Select Device", sorted(df["Device"].unique()))
+selected_id     = st.sidebar.selectbox("Select User", sorted(df["ID"].unique()))
+
+selected_source = f"{selected_device}_{selected_id}"
 
 # Filter df for selected ID
-df_id = df[df["ID"] == selected_id].sort_values("ds")
+#df_id = df[df["ID"] == selected_id].sort_values("ds")
+df_id = df[df["Source"] == selected_source].sort_values("ds")
 
 # Select date
 min_date = df_id["ds"].min().date()
@@ -72,9 +109,19 @@ if selected_date not in available_dates:
 
 df_selected = df_id[df_id["ds"].dt.date == selected_date]
 
+st.sidebar.markdown("---")  # Visual seperation from the next part
+
 # ------------------------------
 # WEATHER DISPLAY FOR SELECTED DATE
 # ------------------------------
+
+#st.sidebar.subheader("Weather on Your Selected Day")   #added
+
+st.sidebar.markdown(
+    "<div style='margin-left:10px; font-size:1.2em;'>Weather on Your Selected Day</div>",
+    unsafe_allow_html=True
+)    #Wraping  the subheader, to allign it with weather data
+
 if not df_selected.empty:
     data = {
         "Temperature_mean": df_selected["Temp_Mean"].values[0],
@@ -120,13 +167,32 @@ if not df_selected.empty:
         🌬️ Wind: {wind_speed} m/s {wind_label}<br>
         🌧️ Precipitation: {data["Precip_sum"]:.2f} mm<br>
         ❄️ Snowfall: {data["Snowfall_sum"]:.2f} mm, Cover: {data["Snowcover_mean"]:.2f}%<br>
-        ⚡ Consumption: {data["Consumption"]:.2f} kWh
         </p>
         """,
         unsafe_allow_html=True
     )
 else:
     st.sidebar.warning("No data available for selected ID and date.")
+
+st.sidebar.markdown("---")  # Visual seperation from the next part
+
+# ------------------------------
+# About the App Info Text
+# ------------------------------
+
+with st.sidebar.expander("ℹ️ About this app", expanded=False):
+    st.markdown(
+        """
+        This is a **prototype** application designed for members of the Kalam community.  
+        It allows you to:
+
+        - Check your household's **past hydropower supply** (kWh)  
+        - View your **forecasted hydropower supply** for upcoming days  
+        - See the **weather conditions** for the selected day  
+
+        The goal is to help the community **understand and manage their energy use** more easily.  
+        """
+    )    
 
 # ------------------------------
 # 10-DAY FORECAST WINDOW
@@ -147,28 +213,37 @@ df_forecast = df_forecast.set_index("ds").reindex(all_dates).rename_axis("ds").r
 # Titel and Slideshow
 # ------------------------------
 st.markdown("<h1 style='text-align: center; color: #00D4FF;'>⚡Watt’s Up, Kalam?⚡</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 18px; color: #555;'>Hydropower & Climate Optimization Dashboard</p>", unsafe_allow_html=True)
-st.write("Select an ID and a date from the sidebar to see the power consumption and daily weather summary.")
-#st.write(f"Showing forecast for **ID: {selected_id}** starting from **{selected_date}**")
+#st.markdown("<p style='text-align: center; font-size: 18px; color: #555;'>Hydropower & Climate Optimization Dashboard</p>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style='text-align: center; margin-bottom: 25px;'>
+        <h3 style='color:#00D4FF; font-size:28px; font-weight:600; display:inline-block; margin:0;'>
+            Kalam Micro-Hydro Energy Insights Dashboard
+        </h3>
+        <div style='width:50%; height:3px; background-color:#00D4FF; margin: 5px auto 0 auto; border-radius:2px;'></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
 
 #Path to your images folder
 image_folder = "images"
-image_files = ["hiking.jpg", "Kalam_day.jpg", "Kalam_sunset.jpg", "Kalam-Valley.jpg", 
-               "kalam1.jpg", "lake.jpg", "lake1.jpg", "mountain1.jpg", "rapids.jpg", "flow_of_water.jpg", "micro_hydro_powerplat.jpg", "people_working.jpg"]  # Add more filenames as needed
+image_files = ["micro_hydro_powerplat.jpg","flow_of_water.jpg","rapids.jpg","people_working.jpg","hiking.jpg","kalam_day.jpg", "kalam_sunset.jpg",
+               "mountain1.jpg", "lake.jpg", "kalam1.jpg"]  # Add more filenames as needed
 image_paths = [os.path.join(image_folder, f) for f in image_files]
 captions = [
+    "Micro hydro-power plant.jpg",
+    "Flow of water used in the MHP.jpg",
+    "Rapids in Kalam",
+    "Community members working on the MHP", 
     "Hiking view in Kalam",
     "Kalam during the day", 
     "Kalam during sunset",
-    "Beautiful Kalam Valley Landscape",
     "Kalam mountains", 
-    "Lake Mahodand",
     "Lake Mahodand", 
     "Mountain Falak Sar", 
-    "Rapids in Kalam", 
-    "flow_of_water.jpg", 
-    "micro_hydro_powerplat.jpg", 
-    "people_working.jpg"
 ]
 
 #Initialize session state for image index
@@ -188,11 +263,22 @@ current_index = st.session_state.image_index
 img = Image.open(image_paths[current_index])
 caption = captions[current_index]
 
-#Display image
-st.image(img, caption=f"{caption} ({current_index + 1}/{len(image_paths)})")    #, width=None
+# center the image on main page 
+# Display image centered using a column layout
+col1, col2, col3 = st.columns([1.5, 7, 0.1])  # middle column wider
+with col2:
+    st.image(
+        img,
+        caption=f"{caption} ({current_index + 1}/{len(image_paths)})",
+        width=1000  # fixed width
+        # use_container_width=False  # not needed when width is specified
+    )
+
+#Alternative Display of images with automated wifth adjustment
+#st.image(img, caption=f"{caption} ({current_index + 1}/{len(image_paths)})")    #, width=None
 
 #Navigation buttons
-col1, col2, col3 = st.columns([1, 6, 1])
+col1, col2, col3 = st.columns([1, 7, 1])
 
 with col1:
     if st.button("⬅️"):
@@ -207,25 +293,55 @@ with col3:
 # PREDICTION VALUE
 # ------------------------------        
 
+# Define cutoff date
+cutoff_date = pd.to_datetime("2024-09-24").date()  # make it a date
+
 if not df_selected.empty:
     consumption_value = data["Consumption"]
+
+    # Determine if historic or forecast
+    if selected_date < cutoff_date:
+        data_type = "Historic value"
+        bg_gradient = "linear-gradient(135deg, #4CAF50, #2E7D32)"  # green tones
+        border_color = "#1B5E20"
+    else:
+        data_type = "Forecast value"
+        bg_gradient = "linear-gradient(135deg, #00D4FF, #0077B6)"  # blue/cyan tones
+        border_color = "#005B9C"
+
     st.markdown(
         f"""
-        <div style='text-align:center; background-color:#f0f2f6; padding:20px; border-radius:15px; margin-bottom:20px;'>
-            <h2 style='color:#FF5733; font-size:48px; margin:0;'> {consumption_value:.2f} kWh </h2>
-            <p style='font-size:20px; margin:0;'>Power consumption for ID: <b>{selected_id}</b> on <b>{selected_date}</b></p>
+        <div style='
+            text-align:center; 
+            background: {bg_gradient}; 
+            padding:25px; 
+            border-radius:20px; 
+            border: 3px solid {border_color};
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            margin-bottom:20px;
+        '>
+            <h3 style='color:#FFFFFF; font-size:24px; margin:0;'>{data_type}</h3>
+            <h2 style='color:#FFFFFF; font-size:52px; margin:10px 0 0 0;'> {consumption_value:.2f} kWh </h2>
+            <p style='color:#E0F7FA; font-size:22px; margin:10px 0 0 0;'>
+                Power consumption for 
+                <span style="color:#00FFFF; font-weight:bold; font-size:24px;">{selected_id}</span> 
+                (Device: <span style="color:#00FFFF; font-weight:bold; font-size:24px;">{selected_device}</span>) 
+                on <span style="color:#00FFFF; font-weight:bold; font-size:24px;">{selected_date}</span>
+            </p>
         </div>
         """,
         unsafe_allow_html=True
     )
 else:
-    st.info("No consumption data available for the selected date and ID.")
+    st.info("No hydropower supply data available for the selected date and ID.")
 
 # ------------------------------
 # PLOTS
 # ------------------------------
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Consumption", "Temperature", "Precipitation", "Snowfall", "Snow Cover"])
+
+
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Hydropower Supply", "Temperature", "Precipitation", "Snowfall", "Snow Cover"])
 
 # --- Tab 1: kWh Consumption (historical vs predicted) ---
 with tab1:
@@ -254,7 +370,8 @@ with tab1:
             y=df_hist["kwh"],
             mode='lines+markers',
             name='Historical',
-            line=dict(color='blue')
+            line=dict(color='green', width=4),   #blue
+            marker=dict(size=8)                  # Bigger markers
         ))
 
         # Predicted dashed line
@@ -263,11 +380,12 @@ with tab1:
             y=df_pred["kwh"],
             mode='lines+markers',
             name='Predicted',
-            line=dict(color='red', dash='dot')
+            line=dict(color='#00BFFF', dash='dot', width=4),
+            marker=dict(size=8)                  # Bigger markers  
         ))
 
         fig_kwh.update_layout(
-            title="Power Consumption (kWh)",
+            title="Hydropower Supply (kWh)",
             xaxis_title="Date",
             yaxis_title="kWh",
             legend_title="Type",
@@ -276,7 +394,7 @@ with tab1:
 
         st.plotly_chart(fig_kwh, use_container_width=True)
     else:
-        st.info("No consumption forecast data available.")
+        st.info("No hydropower supply forecast data available.")
 
 # --- Tab 2: Temperature ---
 with tab2:

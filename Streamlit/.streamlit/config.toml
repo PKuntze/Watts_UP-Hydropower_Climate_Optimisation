@@ -1,13 +1,13 @@
 [theme]
 base="dark"
-primaryColor="#00D4FF"           # Bright cyan - matches text & network lines
-backgroundColor="#001F3F"        # Deep navy blue - matches background
-secondaryBackgroundColor="#00A8E6" # Medium teal - for highlights
-textColor="#FFFFFF"              # White text for readability
-baseRadius="full"
+primaryColor="#00A6B2"           # Calm turquoise, accent
+backgroundColor="#1E2B36"        # Slate blue-gray (darker, but not black)
+secondaryBackgroundColor="#2E3E4E" # Muted steel blue for highlights
+textColor="#F5F5F5"              # Off-white for softer contrast
+baseRadius="small"
 
 [theme.sidebar]
-backgroundColor="#002C5C"        # Slightly lighter than main bg for depth
-secondaryBackgroundColor="#005B9C" # Matches dam color
+backgroundColor="#243847"        # Slightly darker sidebar to anchor layout
+secondaryBackgroundColor="#345466" # Gentle muted teal highlight
 textColor="#FFFFFF"
 baseRadius="none"
