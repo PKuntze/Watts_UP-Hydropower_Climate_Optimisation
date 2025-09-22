@@ -49,20 +49,21 @@ def model_id_and_folders(base_dir, model_id):
     return model_id_i
 
 BASEDIR = "/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/"
-MC_MODE = 'mean'
-#MC_MODE = 'median'
-NITER = 100
+#MC_MODE = 'mean'
+MC_MODE = 'median'  ## PK: this appears to not suffer from negative spred?!
+NITER = 1000
+ITERBATCH = 500
 #PREDICT_0_POWER = False
-MODELNAME = model_id_and_folders(BASEDIR, "FP_MonteCarlo_{MC_MODE}_niter{NITER}")
+SAVEFILES = True
+MODELNAME = model_id_and_folders(BASEDIR, f"FP_MonteCarlo_percentiles_{MC_MODE}_niter{NITER}")
+#MODELNAME = model_id_and_folders(BASEDIR, "FP_test_sp_ratio_no_dir_StimesT")
 
 DATA_CONSUMPTION = BASEDIR+"data/Data.csv"
 DATA_CLIMATE = BASEDIR+"data/Kalam_Climate_Data.xlsx"
 DATA_SUBMISSION = BASEDIR+"data/SampleSubmission.csv"
-OUTPUT_SUBMISSION = f"{BASEDIR}/submissions/{MODELNAME}/MySubmission_final_MLP{MODELNAME}.csv"
+OUTPUT_SUBMISSION = f"{BASEDIR}/submissions/{MODELNAME}/MySubmission_final_MLP_{MODELNAME}.csv"
 PLOTS_DIR = f"{BASEDIR}/plots/{MODELNAME}"
 MODELS_DIR = f"{BASEDIR}/models/{MODELNAME}"
-
-#os.makedirs(PLOTS_DIR, exist_ok=True)
 
 
 # -------------------------------
@@ -100,7 +101,12 @@ def load_climate(path=DATA_CLIMATE):
         "Snowfall (mm)_sum": "Snowfall_Sum",
         "Snow Cover (%)_mean": "SnowCover_Mean"
     }
-    return daily.rename(columns=rename)
+    df_2 = daily.rename(columns=rename)
+
+    if SAVEFILES:
+        df_2.to_csv(f'{BASEDIR}/data/streamlit_climate_data.csv')
+
+    return df_2
 
 
 def load_consumption(path=DATA_CONSUMPTION):
@@ -113,6 +119,10 @@ def load_consumption(path=DATA_CONSUMPTION):
     df["Date"] = df["date_time"].dt.date
 
     daily = df.groupby(["Source", "Date"]).agg({"kwh": "sum"}).reset_index()
+
+    if SAVEFILES:
+        daily.to_csv(f'{BASEDIR}/data/streamlit_consumption_data.csv')
+
     return daily
 
 
@@ -132,7 +142,9 @@ def add_features(df):
     df = df.copy()
     df["Temp_dew_diff"] = df["Temp_Mean"] - df["Dewpoint_Mean"]
     df["wind_speed"] = np.sqrt(df["U_Wind_Mean"]**2 + df["V_Wind_Mean"]**2)
+    df["wind_direction"] = np.arctan2(-df["U_Wind_Mean"], -df["V_Wind_Mean"]) * 180/np.pi
     df["precip_snow_ratio"] = df["Precipitation_Sum"] / (df["Snowfall_Sum"] + 1e-6)
+    df["snow_cover_temp"] = df["SnowCover_Mean"] / 100 * df["Temp_Mean"]
     return df
 
 
@@ -287,7 +299,10 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1, reduction
 
     elif reduction == "median":
         central = np.median(preds.numpy(), axis=0)
-        spread = mad(preds.numpy(), axis=0)
+        #spread = mad(preds.numpy(), axis=0)
+        spread_low = np.percentile(preds.numpy(), 5, axis=0)
+        spread_high = np.percentile(preds.numpy(), 95, axis=0)
+        spread = [spread_low, spread_high]
 
     else:
         raise ValueError("reduction must be 'mean' or 'median'")
@@ -400,15 +415,18 @@ def run_pipeline():
 
             # Monte Carlo Dropout predictions
             #mc_mean, mc_std = mc_dropout_predictions(model, X_ex, n_iter=50)
-            central, spread = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=10, reduction=MC_MODE)
-            r["pred_kwh"] = max(0, central[0])
-            r["pred_std"] = spread[0]
+            if MC_MODE == 'median':
+                r["pred_kwh"], r["pred_pc5"], r["pred_pc95"] = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=ITERBATCH, reduction=MC_MODE)
+            else:
+                r["pred_kwh"], r["pred_std"] = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=ITERBATCH, reduction=MC_MODE)
 
             lag_hist = pd.concat([lag_hist, pd.DataFrame([{"kwh": r["pred_kwh"]}])], ignore_index=True)
             rows.append(r)
         preds.append(pd.DataFrame(rows))
 
     preds_df = pd.concat(preds)
+    if SAVEFILES:
+        preds_df.to_csv(f'{BASEDIR}/data/streamlit_{MODELNAME}_prediction_data.csv')
 
     # --- Save submission
     sub = pd.read_csv(DATA_SUBMISSION)
@@ -442,10 +460,16 @@ def run_pipeline():
         ax = axes[i]
         ax.plot(df_src["Date"], df_src["kwh"], label="History", alpha=0.7)
         ax.plot(preds_src["Date"], preds_src["pred_kwh"], label="Forecast", linestyle="--", alpha=0.8)
-        ax.fill_between(preds_src["Date"],
-                        preds_src["pred_kwh"] - 2*preds_src["pred_std"],
-                        preds_src["pred_kwh"] + 2*preds_src["pred_std"],
-                        color="orange", alpha=0.3)
+        if MC_MODE == 'median':
+            ax.fill_between(preds_src["Date"],
+                            preds_src["pred_pc5"],
+                            preds_src["pred_pc95"],
+                            color="orange", alpha=0.3)
+        else:
+            ax.fill_between(preds_src["Date"],
+                            preds_src["pred_kwh"] - preds_src["pred_std"],
+                            preds_src["pred_kwh"] + preds_src["pred_std"],
+                            color="orange", alpha=0.3)
         ax.set_title(f"{src}", fontsize=10)
 
     handles, labels = axes[0].get_legend_handles_labels()
@@ -456,21 +480,76 @@ def run_pipeline():
     plt.savefig(os.path.join(PLOTS_DIR, "forecast_20_sources.png"))
     plt.close()
 
+    for i, src in enumerate(sample_sources):
+        df_src = df[df["Source"] == src].copy()
+        preds_src = preds_df[preds_df["Source"] == src].copy()
+
+        plt.figure(figsize=(12, 5))
+        plt.plot(df_src["Date"], df_src["kwh"], label="Actual (history)", alpha=0.7)
+        if MC_MODE == 'median':
+            ax.fill_between(preds_src["Date"],
+                            preds_src["pred_pc5"],
+                            preds_src["pred_pc95"],
+                            color="orange", alpha=0.3)
+        else:
+            ax.fill_between(preds_src["Date"],
+                            preds_src["pred_kwh"] - preds_src["pred_std"],
+                            preds_src["pred_kwh"] + preds_src["pred_std"],
+                            color="orange", alpha=0.3)
+        plt.plot(preds_src["Date"], preds_src["pred_kwh"], label="Predicted (extra month)", linestyle="--", alpha=0.8)
+        plt.title(f"Electricity Consumption - device {src[16:18].strip('_')}, user {src[-2:].lstrip('_')}", fontsize='large')
+        plt.xlabel("Date", fontsize='large'); plt.ylabel("(kWh)", fontsize='large')
+        plt.xticks(fontsize='large')
+        plt.yticks(fontsize='large')
+        plt.legend(fontsize='large'); plt.tight_layout()
+        plt.savefig(os.path.join(PLOTS_DIR, f"forecast_device_{src[16:18].strip('_')}_user_{src[-2:].lstrip('_')}.png"))
+        plt.close()
+        
     # --- Plot total demand
     df_total = df.groupby("Date")["kwh"].sum().reset_index()
     preds_total = preds_df.groupby("Date")[["pred_kwh", "pred_std"]].sum().reset_index()
 
     plt.figure(figsize=(12, 5))
     plt.plot(df_total["Date"], df_total["kwh"], label="Actual Total (history)", alpha=0.7)
+    if MC_MODE == 'median':
+        ax.fill_between(preds_total["Date"],
+                        preds_total["pred_pc5"],
+                        preds_total["pred_pc95"],
+                        color="orange", alpha=0.3)
+    else:
+        ax.fill_between(preds_total["Date"],
+                        preds_total["pred_kwh"] - preds_total["pred_std"],
+                        preds_total["pred_kwh"] + preds_total["pred_std"],
+                        color="orange", alpha=0.3)
     plt.plot(preds_total["Date"], preds_total["pred_kwh"], label="Predicted Total (extra month)", linestyle="--", alpha=0.8)
-    plt.fill_between(preds_total["Date"],
-                     preds_total["pred_kwh"] - 2*preds_total["pred_std"],
-                     preds_total["pred_kwh"] + 2*preds_total["pred_std"],
-                     color="orange", alpha=0.3)
-    plt.title("Total Electricity Demand")
-    plt.xlabel("Date"); plt.ylabel("Total kWh")
-    plt.legend(); plt.tight_layout()
+    plt.title("Total Electricity Consumption", fontsize='large')
+    plt.xlabel("Date", fontsize='large'); plt.ylabel("(kWh)", fontsize='large')
+    plt.xticks(fontsize='large')
+    plt.yticks(fontsize='large')
+    plt.legend(fontsize='large'); plt.tight_layout()
     plt.savefig(os.path.join(PLOTS_DIR, "forecast_total.png"))
+    plt.close()
+
+    plt.figure(figsize=(12, 5))
+    plt.plot(df_total["Date"], df_total["kwh"], label="Actual Total (history)", alpha=0.7)
+    if MC_MODE == 'median':
+        ax.fill_between(preds_total["Date"],
+                        preds_total["pred_pc5"],
+                        preds_total["pred_pc95"],
+                        color="orange", alpha=0.3)
+    else:
+        ax.fill_between(preds_total["Date"],
+                        preds_total["pred_kwh"] - preds_total["pred_std"],
+                        preds_total["pred_kwh"] + preds_total["pred_std"],
+                        color="orange", alpha=0.3)
+    plt.plot(preds_total["Date"], preds_total["pred_kwh"], label="Predicted Total (extra month)", linestyle="--", alpha=0.8)
+    plt.title("Total Electricity Consumption", fontsize='large')
+    plt.xlabel("Date", fontsize='large'); plt.ylabel("(kWh)", fontsize='large')
+    plt.xticks(fontsize='large')
+    plt.yticks(fontsize='large')
+    plt.legend(fontsize='large'); plt.tight_layout()
+    plt.xlim(pd.to_datetime("2024-06-24"),pd.to_datetime("2024-10-24"))
+    plt.savefig(os.path.join(PLOTS_DIR, "forecast_total_window.png"))
     plt.close()
 
     end_timer_plot = time.perf_counter()  # high-precision timer
