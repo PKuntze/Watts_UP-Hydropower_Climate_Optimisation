@@ -1,0 +1,5 @@
+MLP_FP_MonteCarlo_mean_niter50_1 pre processing run time: 0 min 25 sec
+MLP_FP_MonteCarlo_mean_niter50_1 training + validation run time: 0 min 20 sec
+MLP_FP_MonteCarlo_mean_niter50_1 prediction + submission run time: 1 min 28 sec
+MLP_FP_MonteCarlo_mean_niter50_1 plotting run time: 0 min 1 sec
+MLP_FP_MonteCarlo_mean_niter50_1 script run time: 2 min 16 sec

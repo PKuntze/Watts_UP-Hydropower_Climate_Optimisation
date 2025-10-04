@@ -1,0 +1,13 @@
+[theme]
+base="dark"
+primaryColor="#00A6B2"           # Calm turquoise, accent
+backgroundColor="#1E2B36"        # Slate blue-gray (darker, but not black)
+secondaryBackgroundColor="#2E3E4E" # Muted steel blue for highlights
+textColor="#F5F5F5"              # Off-white for softer contrast
+baseRadius="small"
+
+[theme.sidebar]
+backgroundColor="#243847"        # Slightly darker sidebar to anchor layout
+secondaryBackgroundColor="#345466" # Gentle muted teal highlight
+textColor="#FFFFFF"
+baseRadius="none"

@@ -1,0 +1,5 @@
+MLP_FP_MonteCarlo_percentiles_median_niter1000_2 pre processing run time: 0 min 25 sec
+MLP_FP_MonteCarlo_percentiles_median_niter1000_2 training + validation run time: 0 min 7 sec
+MLP_FP_MonteCarlo_percentiles_median_niter1000_2 prediction + submission run time: 0 min 54 sec
+MLP_FP_MonteCarlo_percentiles_median_niter1000_2 plotting run time: 0 min 2 sec
+MLP_FP_MonteCarlo_percentiles_median_niter1000_2 script run time: 1 min 30 sec
