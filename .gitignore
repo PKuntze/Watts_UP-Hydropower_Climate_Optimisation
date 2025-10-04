@@ -103,7 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
-.venv*
+.venv
 */.venv*
 env/
 venv/
@@ -129,16 +129,21 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# data and other content
+EDA_and_Temporal_Aggregation_PK_comment.ipynb
+
 data/*.csv
 data/Data.zip
 data/*.xlsx
 models/*.sav
 mlruns
 models/*
-scratch/data/Data.*
-scratch/data/energy_data_1h.csv
-scratch/data/merged_hydro_climate.csv
+plots/*
+submissions/*
+models/
+plots/
+submissions/
+Streamlit/
+Stramlit/*
 scratch/
 scratch/*
 
