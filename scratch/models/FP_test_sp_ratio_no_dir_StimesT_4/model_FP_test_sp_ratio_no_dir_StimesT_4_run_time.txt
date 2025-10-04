@@ -1,0 +1,5 @@
+MLP_FP_test_sp_ratio_no_dir_StimesT_4 pre processing run time: 0 min 27 sec
+MLP_FP_test_sp_ratio_no_dir_StimesT_4 training + validation run time: 0 min 23 sec
+MLP_FP_test_sp_ratio_no_dir_StimesT_4 prediction + submission run time: 0 min 34 sec
+MLP_FP_test_sp_ratio_no_dir_StimesT_4 plotting run time: 0 min 1 sec
+MLP_FP_test_sp_ratio_no_dir_StimesT_4 script run time: 1 min 26 sec

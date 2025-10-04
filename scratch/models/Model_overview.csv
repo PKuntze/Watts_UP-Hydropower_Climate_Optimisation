@@ -1,0 +1,11 @@
+Model name;Zindi ranking;RMSE Zindi;RMSE train;RMSE test;Prediction time;Comment
+FP_06;10;4.668908369;1.133;1.138;9m 31s;Flors 1st place model run on my mac
+FP_06_1;1;4.358537621;1.158;1.155;9m 44s;FP_06
+PK_01;27;4.939014879;1.059;1.116;7m 32s;FP_06 -> moved Scaling after train test split
+PK_02;51;5.120180331;1.062;1.158;7m 2s;PK_01 + wind direction + snow_cover*temp | precip/(snowfall+1e-6) -> snowfall/precip
+PK_03;>100;5.870724727;1.277;1.256;7m 4s;PK_02 - lag=2 - roll=7 - 7 climate features (based on correlation matrix)
+PK_04;18;4.752427311;1.230;1.223;7m 15s;PK_02 - lag=2 - roll=7
+PK_04_1;;;1.225;1.220;7m 31s;PK_02 - lag=2 - roll=8
+PK_05;18;4.752922793;1.261;1.251;7m 14s;PK_02 - 7 climate features (based on correlation matrix)
+PK_06;>100;8.1238116096;1.788;1.934;7m 25s;PK_02 -> fitting on last three month of training data only
+PK_07;;;;;;

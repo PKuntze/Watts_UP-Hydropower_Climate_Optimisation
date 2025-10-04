@@ -1,0 +1,5 @@
+MLP_FP_test_3 pre processing run time: 0 min 28 sec
+MLP_FP_test_3 training + validation run time: 0 min 31 sec
+MLP_FP_test_3 prediction + submission run time: 1 min 20 sec
+MLP_FP_test_3 plotting run time: 0 min 1 sec
+MLP_FP_test_3 script run time: 2 min 21 sec
