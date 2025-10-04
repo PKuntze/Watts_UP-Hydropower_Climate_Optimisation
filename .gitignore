@@ -147,6 +147,8 @@ Streamlit/
 Stramlit/*
 scratch/
 scratch/*
+scratch*/
+scratch*/*
 
 #config file has sensitive data
 .mlflow_uri
