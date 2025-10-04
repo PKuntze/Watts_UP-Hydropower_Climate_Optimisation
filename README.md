@@ -1,112 +1,198 @@
-# ds-modeling-pipeline
+# Project Name
 
-Here you find a Skeleton project for building a simple model in a python script or notebook and log the results on MLFlow.
+A data science project for [your problem statement, e.g. *"time series forecasting of XYZ"*].  
+This repository contains data preprocessing, exploratory analysis, modeling, and an interactive Streamlit application for results visualization.
 
-There are two ways to do it: 
-* In Jupyter Notebooks:
-    We train a simple model in the [jupyter notebook](notebooks/EDA-and-modeling.ipynb), where we select only some features and do minimal cleaning. The hyperparameters of feature engineering and modeling will be logged with MLflow
+---
 
-* With Python scripts:
-    The [main script](modeling/train.py) will go through exactly the same process as the jupyter notebook and also log the hyperparameters with MLflow
+## 📂 Repository Structure
 
-Data used is the [coffee quality dataset](https://github.com/jldbc/coffee-quality-database).
-
-## Requirements:
-
-- pyenv with Python: 3.11.3
-
-### Setup
-
-Use the requirements file in this repo to create a new environment.
-
-```BASH
-make setup
-
-#or
-
-pyenv local 3.11.3
-python -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements_dev.txt
+```
+project-name/
+├── README.md                   <- Project overview and usage
+├── requirements.txt            <- Main Python dependencies
+├── .gitignore                  <- Ignored files for git
+├── data/                       <- (optional placeholder for local datasets)
+│   └── maybe_leave_out/        <- Not tracked / excluded from repo
+│
+├── notebooks/                  <- Explanatory notebooks (EDA & baseline only)
+│   ├── 0_preprocessing.ipynb
+│   ├── 1_exploration.ipynb
+│   ├── 2_time_series_decomp.ipynb
+│   └── 3_naive_baseline_model.ipynb
+│
+├── src/ (PK: Option A)             <- Authoritative source code
+│   ├── __init__.py
+│   ├── data/                   <- include here, or move content to utils/? could also be a placeholder for actual data sets, which we agreed on to not share in the repo
+│   │   ├── __init__.py
+│   │   ├── load_data.py
+│   │   └── preprocess.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── Prophet.py
+│   │   ├── ANN.py
+│   │   ├── LightGBM.py
+│   │   └── train_utils.py      <- leave here, or move to utils/ if data/ or visualization also use it?
+│   └── visualization/          <- include here, or move content to utils/?
+│       ├── __init__.py
+│       └── plots.py
+│
+├── src/ (PK: Option B)
+│   ├── __init__.py
+│   ├── data/                   <- include here only the data sets
+│   │   ├── __init__.py
+│   │   └── data.csv
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── Prophet.py
+│   │   ├── ANN.py
+│   │   └── LightGBM.py
+│   └── utils/                  <- can be removed if it has not content (see other comments)
+│       ├── __init__.py
+│       ├── data.py             <- load_data + preprocess, could include here or in data/
+│       ├── plots.py            <- here or in visualization/
+│       └── train_utils.py      <- include if data/ or visualization/ depend on it train_utils.py
+│
+├── src/ (PK: Option C, prefered by me, best practice if project grows)
+│   ├── __init__.py
+│   ├── data/
+│   │   ├── __init__.py
+│   │   ├── load_data.py
+│   │   ├── preprocess.py
+│   │   ├── raw/                 <- Raw datasets (CSV)
+│   │   │   ├── dataset1.csv
+│   │   │   └── dataset2.csv
+│   │   └── processed/           <- Processed datasets (CSV or parquet)
+│   │       ├── dataset1_clean.csv
+│   │       └── dataset2_clean.csv
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── ANN.py
+│   │   ├── LightGBM.py
+│   │   ├── Prophet.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── train_utils.py
+│   └── visualization/
+│       ├── __init__.py
+│       └── plots.py
+│
+├── app/                        <- Interactive Streamlit application
+│   ├── __init__.py
+│   ├── streamlit_app.py
+│   ├── requirements.txt        <- App-specific dependencies
+│   ├── data/
+│   │   ├── __init__.py
+│   │   └── data.csv
+│   ├── pages/
+│   │   ├── __init__.py
+│   │   └── page1.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── data_processing.py
+│   │   └── visualization.py
+│   └── images/
+│       ├── __init__.py
+│       └── logo.png
+│
+├── reports/                    <- Generated outputs and presentation
+│   ├── figures/
+│   │   └── figure1.png
+│   └── Presentation.pptx
+│
+└── configs/                    <- Configuration files
+    └── config.yaml
 ```
 
-The `requirements.txt` file contains the libraries needed for deployment.. of model or dashboard .. thus no jupyter or other libs used during development.
+---
 
-The MLFLOW URI should **not be stored on git**, you have two options, to save it locally in the `.mlflow_uri` file:
+## ⚙️ Setup
 
-```BASH
-echo http://127.0.0.1:5000/ > .mlflow_uri
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/project-name.git
+cd project-name
 ```
 
-This will create a local file where the uri is stored which will not be added on github (`.mlflow_uri` is in the `.gitignore` file). Alternatively you can export it as an environment variable with
+### 2. Create a virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 📊 Workflow
+
+### Data
+- Place raw datasets into `data/` (not tracked in GitHub).  
+- Processed data is generated using `src/data/preprocess.py`.  
+
+### Notebooks (storytelling only)
+- **0_preprocessing.ipynb** → demonstrates data cleaning steps.  
+- **1_exploration.ipynb** → exploratory analysis and visualization.  
+- **2_time_series_decomp.ipynb** → seasonal/trend decomposition.  
+- **3_naive_baseline_model.ipynb** → simple baseline for benchmarking.  
+
+### Models
+- Located in `src/models/`  
+  - `Prophet.ipynb` – Prophet model implementation  
+  - `ANN.ipynb` – Neural network model  
+  - `LightGBM.ipynb` – Gradient boosting model  
+  - `train_utils.py` – shared functions for training/evaluation  
+
+### Visualizations
+- Custom plots in `src/visualization/plots.py`.  
+- Figures stored in `reports/figures/`.  
+
+---
+
+## 🚀 Running the Streamlit App
+
+Navigate to the `app/` directory and install its dependencies:
 
 ```bash
-export MLFLOW_URI=http://127.0.0.1:5000/
+cd app
+pip install -r requirements.txt
 ```
 
-This links to your local mlflow, if you want to use a different one, then change the set uri.
-
-The code in the [config.py](modeling/config.py) will try to read it locally and if the file doesn't exist will look in the env var.. IF that is not set the URI will be empty in your code.
-
-## Usage
-
-### Creating an MLFlow experiment
-
-You can do it via the GUI or via [command line](https://www.mlflow.org/docs/latest/tracking.html#managing-experiments-and-runs-with-the-tracking-service-api) if you use the local mlflow:
+Run the app:
 
 ```bash
-mlflow experiments create --experiment-name 0-template-ds-modeling
+streamlit run streamlit_app.py
 ```
 
-Check your local mlflow
+This launches an interactive dashboard with multiple pages, powered by data in `app/data/`.
 
-```bash
-mlflow ui
-```
+---
 
-and open the link [http://127.0.0.1:5000](http://127.0.0.1:5000)
+## 📑 Reports
 
-This will throw an error if the experiment already exists. **Save the experiment name in the [config file](modeling/config.py).**
+- **Figures** → `reports/figures/`  
+- **Presentation slides** → `reports/Presentation.pptx`  
 
-In order to train the model and store test data in the data folder and the model in models run:
+---
 
-```bash
-#activate env
-source .venv/bin/activate
+## 📌 Notes
 
-python -m modeling.train
-```
+- `src/` contains the authoritative code for reproducibility.  
+- `notebooks/` are explanatory and showcase data preparation, EDA, and baseline results.  
+- Use `configs/config.yaml` for project settings (paths, parameters).  
+- Raw data should **not** be committed to GitHub.  
 
-In order to test that predict works on a test set you created run:
+---
 
-```bash
-python modeling/predict.py models/linear data/X_test.csv data/y_test.csv
-```
+## ✨ Authors
 
-## About MLFLOW -- delete this when using the template
+This project was developed collaboratively by the entire project team.  
+**All members contributed equally to every stage of the project, including data preparation, modeling, visualization, app development, and reporting.**
 
-MLFlow is a tool for tracking ML experiments. You can run it locally or remotely. It stores all the information about experiments in a database.
-And you can see the overview via the GUI or access it via APIs. Sending data to mlflow is done via APIs. And with mlflow you can also store models on S3 where you version them and tag them as production for serving them in production.
-![mlflow workflow](images/0_general_tracking_mlflow.png)
-
-### MLFlow GUI
-
-You can group model trainings in experiments. The granularity of what an experiment is up to your usecase. Recommended is to have an experiment per data product, as for all the runs in an experiment you can compare the results.
-![gui](images/1_gui.png)
-
-### Code to send data to MLFlow
-
-In order to send data about your model you need to set the connection information, via the tracking uri and also the experiment name (otherwise the default one is used). One run represents a model, and all the rest is metadata. For example if you want to save train MSE, test MSE and validation MSE you need to name them as 3 different metrics.
-If you are doing CV you can set the tracking as nested.
-![mlflow code](images/2_code.png)
-
-### MLFlow metadata
-
-There is no constraint between runs to have the same metadata tracked. I.e. for one run you can track different tags, different metrics, and different parameters (in cv some parameters might not exist for some runs so this .. makes sense to be flexible).
-
-- tags can be anything you want.. like if you do CV you might want to tag the best model as "best"
-- params are perfect for hypermeters and also for information about the data pipeline you use, if you scaling vs normalization and so on
-- metrics.. should be numeric values as these can get plotted
-
-![mlflow metadata](images/3_metadata.png)
+- [Your Name]  
+- [Collaborator 1]  
+- [Collaborator 2]
