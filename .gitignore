@@ -136,6 +136,8 @@ data/*.xlsx
 models/*.sav
 mlruns
 models/*
+scratch/data/*.csv
+scratch/data/*.zip
 #scratch/
 #scratch/*
 
