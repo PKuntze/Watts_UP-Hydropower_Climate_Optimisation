@@ -104,6 +104,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+*/.venv*
 env/
 venv/
 ENV/
@@ -138,6 +139,8 @@ mlruns
 models/*
 plots/*
 submissions/*
+scratch/
+scratch/*
 
 #config file has sensitive data
 .mlflow_uri
