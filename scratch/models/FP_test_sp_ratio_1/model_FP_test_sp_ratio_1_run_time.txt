@@ -1,5 +1,0 @@
-MLP_FP_test_sp_ratio_1 pre processing run time: 0 min 27 sec
-MLP_FP_test_sp_ratio_1 training + validation run time: 0 min 32 sec
-MLP_FP_test_sp_ratio_1 prediction + submission run time: 0 min 33 sec
-MLP_FP_test_sp_ratio_1 plotting run time: 0 min 1 sec
-MLP_FP_test_sp_ratio_1 script run time: 1 min 35 sec

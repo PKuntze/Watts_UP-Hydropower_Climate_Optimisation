@@ -1,5 +1,0 @@
-MLP_FP_MonteCarlo_{MC_MODE}_niter{NITER}_1 pre processing run time: 0 min 24 sec
-MLP_FP_MonteCarlo_{MC_MODE}_niter{NITER}_1 training + validation run time: 0 min 23 sec
-MLP_FP_MonteCarlo_{MC_MODE}_niter{NITER}_1 prediction + submission run time: 2 min 33 sec
-MLP_FP_MonteCarlo_{MC_MODE}_niter{NITER}_1 plotting run time: 0 min 1 sec
-MLP_FP_MonteCarlo_{MC_MODE}_niter{NITER}_1 script run time: 3 min 23 sec

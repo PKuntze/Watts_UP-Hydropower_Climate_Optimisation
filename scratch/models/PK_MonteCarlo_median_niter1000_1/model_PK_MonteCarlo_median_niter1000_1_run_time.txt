@@ -1,5 +1,0 @@
-MLP_PK_MonteCarlo_median_niter1000_1 pre processing run time: 0 min 28 sec
-MLP_PK_MonteCarlo_median_niter1000_1 training + validation run time: 0 min 38 sec
-MLP_PK_MonteCarlo_median_niter1000_1 prediction + submission run time: 2 min 50 sec
-MLP_PK_MonteCarlo_median_niter1000_1 plotting run time: 0 min 1 sec
-MLP_PK_MonteCarlo_median_niter1000_1 script run time: 4 min 0 sec
