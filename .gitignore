@@ -139,8 +139,8 @@ models/*
 scratch/data/Data.*
 scratch/data/energy_data_1h.csv
 scratch/data/merged_hydro_climate.csv
-#scratch/
-#scratch/*
+scratch/
+scratch/*
 
 #config file has sensitive data
 .mlflow_uri
