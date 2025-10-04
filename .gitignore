@@ -136,8 +136,9 @@ data/*.xlsx
 models/*.sav
 mlruns
 models/*
-scratch/data/*.csv
-scratch/data/*.zip
+scratch/data/Data.*
+scratch/data/energy_data_1h.csv
+scratch/data/merged_hydro_climate.csv
 #scratch/
 #scratch/*
 
