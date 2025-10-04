@@ -1,4 +1,0 @@
-MLP_FP_MonteCarlo_4 pre processing run time: -1 min 35 sec
-MLP_FP_MonteCarlo_4 training + validation run time: -1 min 40 sec
-MLP_FP_MonteCarlo_4 prediction + submission run time: -40 min 21 sec
-MLP_FP_MonteCarlo_4 plotting run time: -1 min 58 sec
