@@ -251,7 +251,78 @@ current_index = st.session_state.image_index
 img = Image.open(image_paths[current_index])
 caption = captions[current_index]
 
+# center the image on main page 
+# Display image centered using a column layout
+col1, col2, col3 = st.columns([1.5, 7, 0.1])  # middle column wider
+with col2:
+    st.image(
+        img,
+        caption=f"{caption} ({current_index + 1}/{len(image_paths)})",
+        width=1000  # fixed width
+        # use_container_width=False  # not needed when width is specified
+    )
 
+#Navigation buttons
+col1, col2, col3 = st.columns([1, 7, 1])
+
+with col1:
+    if st.button("⬅️"):
+        prev_image()
+
+with col3:
+    if st.button("➡️"):
+        next_image()
+
+# ------------------------------
+# PREDICTION VALUE
+# ------------------------------        
+
+# Define cutoff date
+cutoff_date = pd.to_datetime("2024-09-24").date()  # make it a date
+
+if not df_selected.empty:
+    consumption_value = data["Consumption"]
+
+    # Determine if historic or forecast
+    if selected_date < cutoff_date:
+        data_type = "Historic value"
+        bg_gradient = "linear-gradient(135deg, #4CAF50, #2E7D32)"  # green tones
+        border_color = "#1B5E20"
+    else:
+        data_type = "Forecast value"
+        bg_gradient = "linear-gradient(135deg, #00D4FF, #0077B6)"  # blue/cyan tones
+        border_color = "#005B9C"
+
+    st.markdown(
+        f"""
+        <div style='
+            text-align:center; 
+            background: {bg_gradient}; 
+            padding:25px; 
+            border-radius:20px; 
+            border: 3px solid {border_color};
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            margin-bottom:20px;
+        '>
+            <h3 style='color:#FFFFFF; font-size:24px; margin:0;'>{data_type}</h3>
+            <h2 style='color:#FFFFFF; font-size:52px; margin:10px 0 0 0;'> {consumption_value:.2f} kWh </h2>
+            <p style='color:#E0F7FA; font-size:22px; margin:10px 0 0 0;'>
+                Power consumption for 
+                <span style="color:#00FFFF; font-weight:bold; font-size:24px;">{selected_id}</span> 
+                (Device: <span style="color:#00FFFF; font-weight:bold; font-size:24px;">{selected_device}</span>) 
+                on <span style="color:#00FFFF; font-weight:bold; font-size:24px;">{selected_date}</span>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.info("No hydropower supply data available for the selected date and ID.")
+
+
+# ------------------------------
+# PLOTS
+# ------------------------------
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Consumption", "Temperature", "Precipitation", "Snowfall", "Snow Cover"])
 
@@ -282,7 +353,8 @@ with tab1:
             y=df_hist["kwh"],
             mode='lines+markers',
             name='Historical',
-            line=dict(color='blue')
+            line=dict(color='green', width=4),   #blue
+            marker=dict(size=8)                  # Bigger markers
         ))
 
         # Predicted dashed line
@@ -291,11 +363,12 @@ with tab1:
             y=df_pred["kwh"],
             mode='lines+markers',
             name='Predicted',
-            line=dict(color='red', dash='dot')
+            line=dict(color='#00BFFF', dash='dot', width=4),
+            marker=dict(size=8)                  # Bigger markers  
         ))
 
         fig_kwh.update_layout(
-            title="Power Consumption (kWh)",
+            title="Hydropower Supply (kWh)",
             xaxis_title="Date",
             yaxis_title="kWh",
             legend_title="Type",
@@ -304,7 +377,7 @@ with tab1:
 
         st.plotly_chart(fig_kwh, use_container_width=True)
     else:
-        st.info("No consumption forecast data available.")
+        st.info("No hydropower supply forecast data available.")
 
 # --- Tab 2: Temperature ---
 with tab2:
