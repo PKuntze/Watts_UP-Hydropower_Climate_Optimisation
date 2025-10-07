@@ -196,8 +196,62 @@ df_forecast = df_forecast.set_index("ds").reindex(all_dates).rename_axis("ds").r
 # ------------------------------
 # MAIN CONTENT
 # ------------------------------
-st.title("⚡Watt’s Up, Kalam?⚡")
-st.write(f"Showing forecast for **ID: {selected_id}** starting from **{selected_date}**")
+
+# ------------------------------
+# Title and Slideshow
+# ------------------------------
+st.markdown("<h1 style='text-align: center; color: #00D4FF;'>⚡Watt’s Up, Kalam?⚡</h1>", unsafe_allow_html=True)
+#st.markdown("<p style='text-align: center; font-size: 18px; color: #555;'>Hydropower & Climate Optimization Dashboard</p>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style='text-align: center; margin-bottom: 25px;'>
+        <h3 style='color:#00D4FF; font-size:28px; font-weight:600; display:inline-block; margin:0;'>
+            Kalam Micro-Hydro Energy Insights Dashboard
+        </h3>
+        <div style='width:50%; height:3px; background-color:#00D4FF; margin: 5px auto 0 auto; border-radius:2px;'></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
+#Path to your images folder
+image_folder = "images"
+image_files = ["micro_hydro_powerplat.jpg","flow_of_water.jpg","rapids.jpg","people_working.jpg","hiking.jpg","kalam_day.jpg", "kalam_sunset.jpg",
+               "mountain1.jpg", "lake.jpg", "kalam1.jpg"]  # Add more filenames as needed
+image_paths = [os.path.join(image_folder, f) for f in image_files]
+captions = [
+    "Micro hydro-power plant.jpg",
+    "Flow of water used in the MHP.jpg",
+    "Rapids in Kalam",
+    "Community members working on the MHP", 
+    "Hiking view in Kalam",
+    "Kalam during the day", 
+    "Kalam during sunset",
+    "Kalam mountains", 
+    "Lake Mahodand", 
+    "Mountain Falak Sar", 
+]
+
+#Initialize session state for image index
+if 'image_index' not in st.session_state:
+    st.session_state.image_index = 0
+
+#Function to go to next image
+def next_image():
+    st.session_state.image_index = (st.session_state.image_index + 1) % len(image_paths)
+
+#Function to go to previous image
+def prev_image():
+    st.session_state.image_index = (st.session_state.image_index - 1) % len(image_paths)
+
+#Get current image and caption
+current_index = st.session_state.image_index
+img = Image.open(image_paths[current_index])
+caption = captions[current_index]
+
+
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Consumption", "Temperature", "Precipitation", "Snowfall", "Snow Cover"])
 
