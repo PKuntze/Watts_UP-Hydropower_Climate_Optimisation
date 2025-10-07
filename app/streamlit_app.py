@@ -8,50 +8,78 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import sys
+import os
 from PIL import Image  # Pillow library
 import folium
 from streamlit_folium import st_folium
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 
-# LOAD Data: merged Table - ANN output + historical data --> @Bernd
-data_path="Streamlit/Streamlit_Input.csv"
-df= pd.read_csv(data_path)
+# ------------------------------
+# Set Page Layout
+# ------------------------------
 
-### Section: Left Sidebar
+st.set_page_config(
+    page_title="WattsUp – Micro-Hydro Forecasts",
+    page_icon="⚡",
+    layout="wide"
+)
 
-# LOGO   --> @ Florencia
+st.markdown(
+    """
+    <style>
+    /* Make main content use more width */
+    .block-container {
+        max-width: 95%;   /* increase/decrease overall width */
+        padding-left: 1rem;   /* tighter left margin */
+        padding-right: 1rem;  /* tighter right margin */
+    }
 
-# Select User ID (from list)    --> store this as userID 
-# Select Date (from calendar)   --> stor this as selected_date
+    /* Adjust sidebar width */
+    [data-testid="stSidebar"] {
+        min-width: 300px;   /* default ~250px, increase for readability */
+        max-width: 350px;   /* prevent it from getting too wide */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# Weather of the day --> @Gozal
+
 # ------------------------------
 # LOAD DATA
 # ------------------------------
-data_path = "Streamlit/Streamlit_Input.csv"
+data_path = "app/data/Streamlit_Input.csv"
 df = pd.read_csv(data_path)
 
 # Clean column names
 df.columns = df.columns.str.strip()
 
-# Rename 'Source' to 'ID'
-df.rename(columns={"Source": "ID"}, inplace=True)
+#split Source into two new columns for selectors
+df[["Device", "ID"]] = df["Source"].str.extract(r"^(consumer_device_\d+)_(data_user_\d+)$")
 
 # Ensure 'Date' column is datetime
 df["Date"] = pd.to_datetime(df["Date"])
 df["ds"] = df["Date"]
 
+
 # ------------------------------
 # SIDEBAR / SELECTIONS
 # ------------------------------
-st.sidebar.header("Select Options")
 
-# Select ID
-selected_id = st.sidebar.selectbox("Select ID", df["ID"].unique())
+#Add Logo
+st.sidebar.image("images/logo_option_4.png", use_container_width=True) 
+
+st.sidebar.header("Check Your Energy Forecast")
+
+# Sidebar selectors
+selected_device = st.sidebar.selectbox("Select Device", sorted(df["Device"].unique()))
+selected_id     = st.sidebar.selectbox("Select User", sorted(df["ID"].unique()))
+
+selected_source = f"{selected_device}_{selected_id}"
 
 # Filter df for selected ID
-df_id = df[df["ID"] == selected_id].sort_values("ds")
+df_id = df[df["Source"] == selected_source].sort_values("ds")
 
 # Select date
 min_date = df_id["ds"].min().date()
@@ -71,9 +99,17 @@ if selected_date not in available_dates:
 
 df_selected = df_id[df_id["ds"].dt.date == selected_date]
 
+st.sidebar.markdown("---")  # Visual seperation from the next part
+
 # ------------------------------
 # WEATHER DISPLAY FOR SELECTED DATE
 # ------------------------------
+
+st.sidebar.markdown(
+    "<div style='margin-left:10px; font-size:1.2em;'>Weather on Your Selected Day</div>",
+    unsafe_allow_html=True
+)    #Wraping  the subheader, to allign it with weather data
+
 if not df_selected.empty:
     data = {
         "Temperature_mean": df_selected["Temp_Mean"].values[0],
@@ -128,6 +164,24 @@ else:
     st.sidebar.warning("No data available for selected ID and date.")
 
 # ------------------------------
+# About the App Info Text
+# ------------------------------
+
+with st.sidebar.expander("ℹ️ About this app", expanded=False):
+    st.markdown(
+        """
+        This is a **prototype** application designed for members of the Kalam community.  
+        It allows you to:
+
+        - Check your household's **past hydropower supply** (kWh)  
+        - View your **forecasted hydropower supply** for upcoming days  
+        - See the **weather conditions** for the selected day  
+
+        The goal is to help the community **understand and manage their energy use** more easily.  
+        """
+    )    
+
+# ------------------------------
 # 10-DAY FORECAST WINDOW
 # ------------------------------
 forecast_start = pd.to_datetime(selected_date)
@@ -137,6 +191,7 @@ df_forecast = df_id[(df_id["ds"] >= forecast_start) & (df_id["ds"] <= forecast_e
 # Pad missing dates to ensure 10-day continuity
 all_dates = pd.date_range(forecast_start, forecast_end)
 df_forecast = df_forecast.set_index("ds").reindex(all_dates).rename_axis("ds").reset_index()
+
 
 # ------------------------------
 # MAIN CONTENT
