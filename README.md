@@ -104,6 +104,31 @@ project-name/
   ```
 </details>
 
+### Data
+- Place raw datasets into `data/` (not tracked in GitHub).  
+- Processed data is generated using `src/data/preprocess.py`.  
+
+### Notebooks (storytelling only)
+- **0_preprocessing.ipynb** → demonstrates data cleaning steps.  
+- **1_exploration.ipynb** → exploratory analysis and visualization.  
+- **2_time_series_decomp.ipynb** → seasonal/trend decomposition.  
+- **3_naive_baseline_model.ipynb** → simple baseline for benchmarking.  
+
+### Models
+- Located in `src/models/`  
+  - `Prophet.ipynb` – Prophet model implementation  
+  - `ANN.ipynb` – Neural network model  
+  - `LightGBM.ipynb` – Gradient boosting model  
+  - `train_utils.py` – shared functions for training/evaluation  
+
+### Visualizations
+- Custom plots in `src/visualization/plots.py`.  
+- Figures stored in `reports/figures/`.
+
+### Streamlit app
+
+### Reports
+
 ---
 
 ## ⚙️ Setup
