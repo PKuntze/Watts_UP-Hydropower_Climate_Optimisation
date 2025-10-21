@@ -7,7 +7,7 @@ This repository contains data preprocessing, exploratory analysis, modeling, and
 
 ## 📂 Repository Structure
 <details>
-  <summary>Click me</summary>
+  <summary>Structure Visualization</summary>
     
   ```
 project-name/
