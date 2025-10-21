@@ -68,10 +68,16 @@ project-name/
 </details>
 
 ### Data
-- Place raw datasets into `data/` (not tracked in GitHub).  
-- Processed data is generated using `src/data/preprocess.py`.  
 
-### Notebooks (storytelling only)
+The data used in this project comes from [the IBM SkillsBuild Hydropower Climate Optimisation Challenge.](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge/data) 
+
+- Data.zip → contains the hydropower generation data (energy output per source).
+
+- Climate Data.zip → contains the daily weather and environmental variables.
+
+- SampleSubmission.csv → template for final submission format.
+
+### Notebooks 
 - **0_preprocessing.ipynb** → demonstrates data cleaning steps.  
 - **1_exploration.ipynb** → exploratory analysis and visualization.  
 - **2_time_series_decomp.ipynb** → seasonal/trend decomposition.  
