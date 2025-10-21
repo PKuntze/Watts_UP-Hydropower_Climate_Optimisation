@@ -164,6 +164,8 @@ This launches an interactive dashboard with multiple pages, powered by data in `
 This project was developed collaboratively by the entire project team.  
 **All members contributed equally to every stage of the project, including data preparation, modeling, visualization, app development, and reporting.**
 
-- [Your Name]  
-- [Collaborator 1]  
-- [Collaborator 2]
+- Noé Espinosa-Novo
+- Gozal Jabrayilova 
+- Patrick Kuntze
+- Bernd Hermann
+- Florencia Perachia
