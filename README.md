@@ -6,8 +6,10 @@ This repository contains data preprocessing, exploratory analysis, modeling, and
 ---
 
 ## 📂 Repository Structure
-
-```
+<details>
+  <summary>Click me</summary>
+    
+  ```
 project-name/
 ├── README.md                   <- Project overview and usage
 ├── requirements.txt            <- Main Python dependencies
@@ -102,7 +104,8 @@ project-name/
 │
 └── configs/                    <- Configuration files
     └── config.yaml
-```
+  ```
+</details>
 
 ---
 
