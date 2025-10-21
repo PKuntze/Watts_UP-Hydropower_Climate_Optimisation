@@ -97,13 +97,10 @@ project-name/
 │       ├── __init__.py
 │       └── logo.png
 │
-├── reports/                    <- Generated outputs and presentation
-│   ├── figures/
-│   │   └── figure1.png
-│   └── Presentation.pptx
-│
-└── configs/                    <- Configuration files
-    └── config.yaml
+└── reports/                    <- Generated outputs and presentation
+    ├── figures/
+    │   └── figure1.png
+    └── Presentation.pptx
   ```
 </details>
 
