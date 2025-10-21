@@ -98,9 +98,9 @@ project-name/
 │       └── logo.png
 │
 └── reports/                    <- Generated outputs and presentation
-    ├── figures/
-    │   └── figure1.png
-    └── Presentation.pptx
+      ├── figures/
+      │   └── figure1.png
+      └── Presentation.pptx
   ```
 </details>
 
