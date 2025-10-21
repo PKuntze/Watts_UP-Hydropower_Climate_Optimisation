@@ -6,6 +6,29 @@ This project was developed as part of the IBM SkillsBuild Hydropower Climate Opt
 
 This repository contains data preprocessing, exploratory analysis, modeling, and an interactive Streamlit application for results visualization.
 
+We compared three complementary forecasting methods:
+
+
+- Multilayer Perceptron (MLP) — a deep neural network with dropout layers and Monte Carlo uncertainty estimation.
+
+- LightGBM 
+
+- Prophet — a time-series model developed by Meta, well-suited for capturing seasonality and long-term trends.
+
+
+🔑 Key Elements:
+
+
+- Feature Engineering: Lagged, rolling, and climate-based features to represent temporal and environmental dependencies.
+
+- Recursive Prediction: Multi-step forecasting by iteratively feeding model outputs back as new inputs.
+
+- Uncertainty Estimation: Monte Carlo Dropout in the MLP to generate confidence intervals for each prediction.
+
+- Model Comparison: Evaluation of MLP, LightGBM, and Prophet using RMSE on training, testing, and unseen (extra month) datasets.
+
+
+
 ---
 
 ## 📂 Repository Structure
