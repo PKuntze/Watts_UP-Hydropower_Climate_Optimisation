@@ -10,9 +10,7 @@ We compared three complementary forecasting methods:
 
 
 - Multilayer Perceptron (MLP) — a deep neural network with dropout layers and Monte Carlo uncertainty estimation.
-
 - LightGBM 
-
 - Prophet — a time-series model developed by Meta, well-suited for capturing seasonality and long-term trends.
 
 
