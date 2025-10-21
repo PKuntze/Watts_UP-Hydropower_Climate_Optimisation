@@ -1,6 +1,9 @@
-# Project Name
+# 🌊 Hydropower Forecasting with Machine Learning
+IBM SkillsBuild Hydropower Climate Optimisation Challenge (Zindi Africa): https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge
 
-A data science project for [your problem statement, e.g. *"time series forecasting of XYZ"*].  
+This project was developed as part of the IBM SkillsBuild Hydropower Climate Optimisation Challenge
+, which aims to improve hydropower generation forecasts for off-grid communities using climate data and machine learning.
+
 This repository contains data preprocessing, exploratory analysis, modeling, and an interactive Streamlit application for results visualization.
 
 ---
@@ -23,23 +26,7 @@ project-name/
 │   ├── 2_time_series_decomp.ipynb
 │   └── 3_naive_baseline_model.ipynb
 │
-├── src/ (PK: Option A)             <- Authoritative source code
-│   ├── __init__.py
-│   ├── data/                   <- include here, or move content to utils/? could also be a placeholder for actual data sets, which we agreed on to not share in the repo
-│   │   ├── __init__.py
-│   │   ├── load_data.py
-│   │   └── preprocess.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── Prophet.py
-│   │   ├── ANN.py
-│   │   ├── LightGBM.py
-│   │   └── train_utils.py      <- leave here, or move to utils/ if data/ or visualization also use it?
-│   └── visualization/          <- include here, or move content to utils/?
-│       ├── __init__.py
-│       └── plots.py
-│
-├── src/ (PK: Option B)
+├── src/ 
 │   ├── __init__.py
 │   ├── data/                   <- include here only the data sets
 │   │   ├── __init__.py
@@ -54,30 +41,6 @@ project-name/
 │       ├── data.py             <- load_data + preprocess, could include here or in data/
 │       ├── plots.py            <- here or in visualization/
 │       └── train_utils.py      <- include if data/ or visualization/ depend on it train_utils.py
-│
-├── src/ (PK: Option C, prefered by me, best practice if project grows)
-│   ├── __init__.py
-│   ├── data/
-│   │   ├── __init__.py
-│   │   ├── load_data.py
-│   │   ├── preprocess.py
-│   │   ├── raw/                 <- Raw datasets (CSV)
-│   │   │   ├── dataset1.csv
-│   │   │   └── dataset2.csv
-│   │   └── processed/           <- Processed datasets (CSV or parquet)
-│   │       ├── dataset1_clean.csv
-│   │       └── dataset2_clean.csv
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── ANN.py
-│   │   ├── LightGBM.py
-│   │   ├── Prophet.py
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   └── train_utils.py
-│   └── visualization/
-│       ├── __init__.py
-│       └── plots.py
 │
 ├── app/                        <- Interactive Streamlit application
 │   ├── __init__.py
