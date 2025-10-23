@@ -49,7 +49,7 @@ st.markdown(
 # ------------------------------
 # LOAD DATA
 # ------------------------------
-data_path = "app/data/Streamlit_Input.csv"
+data_path = "data/Streamlit_input.csv"
 df = pd.read_csv(data_path)
 
 # Clean column names
