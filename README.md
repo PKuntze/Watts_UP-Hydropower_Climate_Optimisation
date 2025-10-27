@@ -1,20 +1,19 @@
 # 🌊 Hydropower Forecasting with Machine Learning
-IBM SkillsBuild Hydropower Climate Optimisation Challenge (Zindi Africa): https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge
+IBM SkillsBuild Hydropower Climate Optimisation Challenge [Zindi Africa](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge)
 
-This project was developed as part of the IBM SkillsBuild Hydropower Climate Optimisation Challenge
-, which aims to improve hydropower generation forecasts for off-grid communities using climate data and machine learning.
+This document outlines our team’s approach to improving hydropower generation forecasts for off-grid communities using climate data and machine learning. Reliable hydropower predictions can enhance local energy planning and guide infrastructure optimization.
 
-This repository contains data preprocessing, exploratory analysis, modeling, and an interactive Streamlit application for results visualization.
+We compared several time-series forecasting methods, evaluating their RMSE against benchmark submissions from other participants in the challenge. The three most promising models were:
 
-We compared three complementary forecasting methods:
+- **Multilayer Perceptron (MLP)** — a deep neural network with dropout layers and Monte Carlo uncertainty estimation.
+- **LightGBM** 
+- **Prophet** — a time-series model developed by Meta, well-suited for capturing seasonality and long-term trends.
 
+The MLP achieved the best performance with a Private Leaderboard **RMSE of 4.24**, which would have ranked first if the challenge were still open.
 
-- Multilayer Perceptron (MLP) — a deep neural network with dropout layers and Monte Carlo uncertainty estimation.
-- LightGBM 
-- Prophet — a time-series model developed by Meta, well-suited for capturing seasonality and long-term trends.
+This repository allows users to reproduce the training pipeline and explore forecasts via a Streamlit dashboard. It includes data preprocessing, exploratory analysis, modeling, and evaluation.
 
-
-🔑 Key Elements:
+🔑 **Key Elements**:
 
 - Feature Engineering: Lagged, rolling, and climate-based features to represent temporal and environmental dependencies.
 - Recursive Prediction: Multi-step forecasting by iteratively feeding model outputs back as new inputs.
@@ -86,48 +85,59 @@ project-name/
 
 ### Data
 
-The data used in this project comes from [the IBM SkillsBuild Hydropower Climate Optimisation Challenge.](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge/data) 
+The data originates from the [the IBM SkillsBuild Hydropower Climate Optimisation Challenge.](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge/data) 
 
-- Data.zip → contains the hydropower generation data (energy output per source).
+- Data.zip - contains the hydropower generation data (energy output per source).
 
-- Climate Data.zip → contains the daily weather and environmental variables.
+- Climate Data.zip - contains the daily weather and environmental variables.
 
-- SampleSubmission.csv → template for final submission format.
+- SampleSubmission.csv - template for final submission format.
 
 ### Notebooks 
-- **0_preprocessing.ipynb** → demonstrates data cleaning steps.  
-- **1_exploration.ipynb** → exploratory analysis and visualization.  
-- **2_time_series_decomp.ipynb** → seasonal/trend decomposition.  
-- **3_naive_baseline_model.ipynb** → simple baseline for benchmarking.  
+- **0_preprocessing.ipynb** - demonstrates data cleaning steps.  
+- **1_exploration.ipynb** - exploratory analysis and visualization.  
+- **2_time_series_decomp.ipynb** - seasonal/trend decomposition.  
+- **3_naive_baseline_model.ipynb** - simple baseline for benchmarking.  
+- **04_LightGBM_model_test.ipynb.ipynb**
+- **05_Prophet_model_test.ipynb**
+- **06_ANN_model_test.ipynb**
+- **07_XGBoost_model_test.ipynb**
 
-### Models
-- Located in `src/models/`  
-  - `Prophet.ipynb` – Prophet model implementation  
-  - `ANN.ipynb` – Neural network model  
-  - `LightGBM.ipynb` – Gradient boosting model  
-  - `train_utils.py` – shared functions for training/evaluation  
 
-### Visualizations
-- Custom plots in `src/visualization/plots.py`.  
+### Models (`src/models/`) 
+- `Prophet.ipynb` – Prophet model implementation  
+- `ANN.ipynb` – Neural network model  
+- `LightGBM.ipynb` – Gradient boosting model  
+- `train_utils.py` – shared functions for training/evaluation  
+
+### Visualizations (`src/visualization/`)
+- Custom plots in `plots.py`.  
 - Figures stored in `reports/figures/`.
 
 ### Streamlit app
+Interactive dashboard for visualizing MLP model predictions vor individual households (users).
 
 ### Reports
-
+Contains generated figures and documentation related to model evaluation and results.
 ---
 
 ## ⚙️ Setup
 
+Follow these steps to set up and run the project locally.
+
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/project-name.git
-cd project-name
+git clone https://github.com/<your-username>/<repo-name>.git
+cd <repo-name>
 ```
 
 ### 2. Create a virtual environment
+
+Recommended Python version 3.11.3
+
 ```bash
 python -m venv venv
+# Activate environment
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
@@ -143,20 +153,25 @@ pip install -r requirements.txt
 
 ## 🚀 Running the Streamlit App
 
-Navigate to the `app/` directory and install its dependencies:
+The Streamlit dashboard allows interactive exploration of model forecasts, historical hydropower data and values of the most important weather features.
+
+### Steps
+
+1. Navigate to the `app/` directory and install its dependencies:
 
 ```bash
 cd app
-pip install -r requirements.txt
 ```
-
-Run the app:
+2. Launch the app:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-This launches an interactive dashboard with multiple pages, powered by data in `app/data/`.
+This launches an interactive dashboard with multiple pages, powered by data in `app/data/`. This data contains a merged dataset that combines:
+
+* Model predictions (from the trained MLP)
+* Training data with historical hydropower and climate variables
 
 ---
 
