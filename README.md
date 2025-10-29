@@ -38,7 +38,7 @@ project-name/
 │
 ├── notebooks/                  <- Explanatory notebooks (EDA & baseline only)
 │   ├── 01_exploration.ipynb
-│   ├── 02_naive_baseline_model.ipynb
+│   ├── 02_naive_baseline_model_test.ipynb
 │   ├── 03_LightGBM_model_test.ipynb
 │   ├── 04_Prophet_model_test.ipynb
 │   ├── 05_ANN_model_test.ipynb
