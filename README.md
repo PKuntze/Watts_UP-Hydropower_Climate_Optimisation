@@ -37,26 +37,16 @@ project-name/
 │   └── maybe_leave_out/        <- Not tracked / excluded from repo
 │
 ├── notebooks/                  <- Explanatory notebooks (EDA & baseline only)
-│   ├── 0_preprocessing.ipynb
-│   ├── 1_exploration.ipynb
-│   ├── 2_time_series_decomp.ipynb
-│   └── 3_naive_baseline_model.ipynb
+│   ├── 01_exploration.ipynb
+│   ├── 02_naive_baseline_model.ipynb
+│   ├── 03_LightGBM_model_test.ipynb
+│   ├── 04_Prophet_model_test.ipynb
+│   ├── 05_ANN_model_test.ipynb
+│   └── 06_XGBoost_model_test.ipynb
 │
-├── src/ 
+├── model/ 
 │   ├── __init__.py
-│   ├── data/                   <- include here only the data sets
-│   │   ├── __init__.py
-│   │   └── data.csv
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── Prophet.py
-│   │   ├── ANN.py
-│   │   └── LightGBM.py
-│   └── utils/                  <- can be removed if it has not content (see other comments)
-│       ├── __init__.py
-│       ├── data.py             <- load_data + preprocess, could include here or in data/
-│       ├── plots.py            <- here or in visualization/
-│       └── train_utils.py      <- include if data/ or visualization/ depend on it train_utils.py
+│   └── ANN.py
 │
 ├── app/                        <- Interactive Streamlit application
 │   ├── __init__.py
