@@ -132,6 +132,7 @@ dmypy.json
 
 EDA_and_Temporal_Aggregation_PK_comment.ipynb
 
+data/
 data/*.csv
 data/Data.zip
 data/*.xlsx
