@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/.venv_flor"
+set -gx VIRTUAL_ENV "/Users/patrickkuntze/01-Arbeit/Jobsuche/05_Weiterbildungen/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/.venv_flor"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
