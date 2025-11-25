@@ -33,20 +33,25 @@ project-name/
 ├── README.md                   <- Project overview and usage
 ├── requirements.txt            <- Main Python dependencies
 ├── .gitignore                  <- Ignored files for git
-├── data/                       <- (optional placeholder for local datasets)
-│   └── maybe_leave_out/        <- Not tracked / excluded from repo
 │
 ├── notebooks/                  <- Explanatory notebooks (EDA & baseline only)
-│   ├── 01_exploration.ipynb
-│   ├── 02_naive_baseline_model_test.ipynb
+│   ├── 01_data_preparation_and_exploration.ipynb
+│   ├── 02_naive_baseline_model.ipynb
 │   ├── 03_LightGBM_model_test.ipynb
 │   ├── 04_Prophet_model_test.ipynb
 │   ├── 05_ANN_model_test.ipynb
 │   └── 06_XGBoost_model_test.ipynb
 │
-├── model/ 
-│   ├── __init__.py
-│   └── ANN.py
+├── src/ 
+│   ├── data/                   <- Not shared publicly
+│   ├── model/
+│   │   └── ANN.py              <- Winning model python script
+│   ├── plots/
+│   │   └── ANN_median_pc_niter1000_batch500_1/    <- Folder dynamically created by ANN.py
+│   │       ├── feature_importance.png
+│   │       ...                                    <- Various plots for validation and prediction
+│   │       └── residuals_scatter_Train.png
+│   └── submissions             <- Not shared publicly
 │
 ├── app/                        <- Interactive Streamlit application
 │   ├── __init__.py
@@ -66,10 +71,8 @@ project-name/
 │       ├── __init__.py
 │       └── logo.png
 │
-└── reports/                    <- Generated outputs and presentation
-      ├── figures/
-      │   └── figure1.png
-      └── Presentation.pptx
+└── reports/
+      └── WattsUp_Capstone_Presentation.pdf    <- Capstone presentation of Bootcamp
   ```
 </details>
 
