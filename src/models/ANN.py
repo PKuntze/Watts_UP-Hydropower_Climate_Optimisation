@@ -33,12 +33,11 @@ from tensorflow.keras import layers, models, callbacks, Input
 # -------------------------------
 # 1. Config
 # -------------------------------
-
 def model_id_and_folders(base_dir, model_id):
     """Creates new folders with an incremented suffix and update model_id."""
     i = 1
     model_id_i = f"{model_id}_{i}"
-    
+
     while os.path.exists(f"{base_dir}/plots/{model_id_i}"):
         i += 1
         model_id_i = f"{model_id}_{i}"
@@ -302,8 +301,8 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1,
     central : np.ndarray
         Mean or median predictions (shape = batch_size).
     spread : np.ndarray
-        Std or MAD uncertainty (shape = batch_size). Using percentiles instead
-        avoids negative values.
+        Std, MAD  (shape = batch_size) or percentile uncertainty estimate.
+        Using percentiles avoids negative values.
     """
     preds = []
 
@@ -348,9 +347,7 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1,
 # 8. Pipeline
 # -------------------------------
 def run_pipeline():
-
-    start_timer_proc = time.perf_counter()  # high-precision timer
-
+    """Train, validate, and predict ANN."""
     # --- Load data
     climate = load_climate()
     consumption = load_consumption()
@@ -474,7 +471,9 @@ def run_pipeline():
                 ignore_index=True
                 )
             rows.append(r)
+
         preds.append(pd.DataFrame(rows))
+
     preds_df = pd.concat(preds)
 
     # --- Save submission
@@ -555,7 +554,7 @@ def run_pipeline():
                                  f"forecast_device_{src[16:18].strip('_')}" +
                                  f"_user_{src[-2:].lstrip('_')}.png"))
         plt.close()
-        
+
     # --- Plot total demand
     df_total = df.groupby("Date")["kwh"].sum().reset_index()
     if MC_MODE == 'median':
@@ -621,4 +620,3 @@ def run_pipeline():
 if __name__ == "__main__":
 
     run_pipeline()
-    
