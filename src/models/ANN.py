@@ -1,5 +1,5 @@
 """
-pipeline.py
+Python script pipeline.py for training an ANN.
 
 Full pipeline for hydropower electricity demand forecasting:
 - Load & clean consumption and climate data
@@ -13,19 +13,17 @@ Full pipeline for hydropower electricity demand forecasting:
     * Residuals (histograms, scatter plots)
     * Feature importance (permutation importance)
 """
-
 import os
-import time
+
 import numpy as np
+from scipy.stats import median_abs_deviation as mad
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import (root_mean_squared_error,
                              mean_absolute_percentage_error)
-
 import tensorflow as tf
 from tensorflow.keras import layers, models, callbacks, Input
 
@@ -34,7 +32,7 @@ from tensorflow.keras import layers, models, callbacks, Input
 # 1. Config
 # -------------------------------
 def model_id_and_folders(base_dir, model_id):
-    """Creates new folders with an incremented suffix and update model_id."""
+    """Create new folders with an incremented suffix and update model_id."""
     i = 1
     model_id_i = f"{model_id}_{i}"
 
@@ -46,26 +44,30 @@ def model_id_and_folders(base_dir, model_id):
 
     return model_id_i
 
+
 # Monte carlo mode
-#MC_MODE = 'mean'
-MC_MODE = 'median'
+# MC_MODE = 'mean'
+# MC_MODE = 'median_mad'
+MC_MODE = 'median_pc'
 
 # Parallelization
 NITER = 1000
 ITERBATCH = 500
 
 # Names for files and directories
-BASEDIR = ("/Users/patrickkuntze/01-Arbeit/Jobsuche/05_Weiterbildungen/" +
-           "DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/" +
-           "src/")
-DATA_DIR = BASEDIR+"/data"
-DATA_CONSUMPTION = DATA_DIR+"/Data.csv"
-DATA_CLIMATE = DATA_DIR+"/Kalam Climate Data.xlsx"
-DATA_SUBMISSION = DATA_DIR+"/SampleSubmission.csv"
+BASEDIR = ("/Users/patrickkuntze/01-Arbeit/Jobsuche/05_Weiterbildungen/"
+           + "DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/"
+           + "src/")
+DATA_DIR = BASEDIR + "/data"
+DATA_CONSUMPTION = DATA_DIR + "/Data.csv"
+DATA_CLIMATE = DATA_DIR + "/Kalam Climate Data.xlsx"
+DATA_SUBMISSION = DATA_DIR + "/SampleSubmission.csv"
 
-MODELNAME = model_id_and_folders(BASEDIR, f"ANN_{MC_MODE}_niter{NITER}_batch{ITERBATCH}")
+MODELNAME = model_id_and_folders(BASEDIR,
+                                 f"ANN_{MC_MODE}_niter{NITER}_batch{ITERBATCH}")
 
-OUTPUT_SUBMISSION = f"{BASEDIR}/submissions/{MODELNAME}/MySubmission_final_MLP_{MODELNAME}.csv"
+OUTPUT_SUBMISSION = (f"{BASEDIR}/submissions/{MODELNAME}/"
+                     + f"MySubmission_final_MLP_{MODELNAME}.csv")
 PLOTS_DIR = f"{BASEDIR}/plots/{MODELNAME}"
 MODELS_DIR = f"{BASEDIR}/models/{MODELNAME}"
 
@@ -87,7 +89,7 @@ def load_climate(path=DATA_CLIMATE):
         "Total Precipitation (mm)": "sum",
         "Snowfall (mm)": "sum",
         "Snow Cover (%)": "mean"
-        })
+    })
     daily.columns = ["_".join(col).strip() for col in daily.columns.values]
     daily = daily.reset_index()
 
@@ -104,7 +106,7 @@ def load_climate(path=DATA_CLIMATE):
         "Total Precipitation (mm)_sum": "Precipitation_Sum",
         "Snowfall (mm)_sum": "Snowfall_Sum",
         "Snow Cover (%)_mean": "SnowCover_Mean"
-        }
+    }
     return daily.rename(columns=rename)
 
 
@@ -112,8 +114,8 @@ def load_consumption(path=DATA_CONSUMPTION):
     """Load electricity consumption data and aggregate daily totals."""
     df = pd.read_csv(path)
     df.drop(columns=["consumer_device_9", "consumer_device_x", "v_red",
-                     "v_blue", "v_yellow", "current", "power_factor"],
-                     inplace=True, errors="ignore")
+            "v_blue", "v_yellow", "current", "power_factor"],
+            inplace=True, errors="ignore")
 
     df["date_time"] = pd.to_datetime(df["date_time"])
     df["Date"] = df["date_time"].dt.date
@@ -143,15 +145,19 @@ def add_features(df):
 
 
 def add_lag_roll(df, group_col="Source", target_col="kwh",
-                 lags=[1, 2, 7, 14], windows=[3, 7, 14]):
+                 lags=None, windows=None):
     """Add lag and rolling mean features per Source."""
+    if lags is None:
+        lags = [1, 2, 3]
+    if windows is None:
+        windows = [3, 7, 14]
     df = df.sort_values([group_col, "Date"]).copy()
     for lag in lags:
         df[f"lag_{lag}"] = df.groupby(group_col)[target_col].shift(lag)
     for w in windows:
         df[f"roll_mean_{w}"] = (
             df.groupby(group_col)[target_col].shift(1).rolling(w).mean()
-            )
+        )
     return df
 
 
@@ -161,7 +167,7 @@ def reindex_sources(df):
     all_sources = df["Source"].unique()
     idx = pd.MultiIndex.from_product(
         [all_sources, all_dates], names=["Source", "Date"]
-        )
+    )
 
     df_full = df.set_index(["Source", "Date"]).reindex(idx).reset_index()
     df_full["kwh"] = df_full["kwh"].fillna(0)
@@ -185,7 +191,7 @@ def build_mlp(input_dim):
         layers.Dropout(0.2),
         layers.Dense(32, activation="relu"),
         layers.Dense(1, activation="relu")  # enforce non-negative
-        ])
+    ])
     model.compile(optimizer="adam",
                   loss=tf.keras.losses.Huber(),
                   metrics=[tf.keras.metrics.RootMeanSquaredError()])
@@ -208,7 +214,7 @@ def plot_residuals(y_true, y_pred, dataset_name="Test", zoom_limit=500):
     plt.tight_layout()
     plt.savefig(
         os.path.join(PLOTS_DIR, f"residuals_hist_full_{dataset_name}.png")
-        )
+    )
     plt.close()
 
     # Zoomed histogram
@@ -221,7 +227,7 @@ def plot_residuals(y_true, y_pred, dataset_name="Test", zoom_limit=500):
     plt.tight_layout()
     plt.savefig(
         os.path.join(PLOTS_DIR, f"residuals_hist_zoom_{dataset_name}.png")
-        )
+    )
     plt.close()
 
     # Scatter plot
@@ -234,27 +240,27 @@ def plot_residuals(y_true, y_pred, dataset_name="Test", zoom_limit=500):
     plt.tight_layout()
     plt.savefig(
         os.path.join(PLOTS_DIR, f"residuals_scatter_{dataset_name}.png")
-        )
+    )
     plt.close()
 
 
 # -------------------------------
 # 6. Feature Importance (Permutation)
 # -------------------------------
-def permutation_importance_manual(model, X_val, y_val, feature_names,
+def permutation_importance_manual(model, x_val, y_val, feature_names,
                                   n_repeats=5):
     """Compute permutation importance manually for a Keras model."""
     baseline = root_mean_squared_error(
-        y_val, np.maximum(0, model.predict(X_val, verbose=0).flatten()),
-        )
+        y_val, np.maximum(0, model.predict(x_val, verbose=0).flatten()),
+    )
     importances = {}
 
     for i, col in enumerate(feature_names):
         scores = []
         for _ in range(n_repeats):
-            X_permuted = X_val.copy()
-            np.random.shuffle(X_permuted[:, i])  # shuffle one column
-            y_pred = np.maximum(0, model.predict(X_permuted,
+            x_permuted = x_val.copy()
+            np.random.shuffle(x_permuted[:, i])  # shuffle one column
+            y_pred = np.maximum(0, model.predict(x_permuted,
                                                  verbose=0).flatten())
             score = root_mean_squared_error(y_val, y_pred)
             scores.append(score - baseline)  # increase in RMSE
@@ -264,24 +270,24 @@ def permutation_importance_manual(model, X_val, y_val, feature_names,
         pd.DataFrame(
             {"feature": list(importances.keys()),
              "importance": list(importances.values())}
-             ).sort_values("importance", ascending=False)
-        )
+        ).sort_values("importance", ascending=False)
+    )
 
 
 # -------------------------------
 # 7. Monte Carlo Dropout
 # -------------------------------
 @tf.function
-def dropout_forward(model, X):
+def dropout_forward(model, x):
     """Single dropout-enabled forward pass."""
-    return model(X, training=True, verbose=0)
+    return model(x, training=True, verbose=0)
 
 
-def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1,
+def mc_dropout_predictions_parallel(model, x, n_iter=50, batch_size=1,
                                     reduction='mean'):
     """
     Monte Carlo Dropout predictions with configurable uncertainty measure.
-    
+
     Parameters
     ----------
     model : tf.keras.Model
@@ -294,28 +300,29 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1,
         Number of MC samples to process per chunk (controls memory vs. speed).
     reduction : str
         "mean" → use mean + std
-        "median" → use median + MAD
+        "median_mad" → use median + MAD
+        "median_pc" → use median + 5th and 95th percentile
 
     Returns
     -------
     central : np.ndarray
-        Mean or median predictions (shape = batch_size).
-    spread : np.ndarray
-        Std, MAD  (shape = batch_size) or percentile uncertainty estimate.
-        Using percentiles avoids negative values.
+        Mean or median predictions.
+    spread, spread_low, spread_high : np.ndarrays
+        Std or MAD uncertainty. Or lower and upper uncertainty estimates using
+        percentiles, which avoids negative values.
     """
     preds = []
 
-    for start in range(0, n_iter, batch_size):
+    for _batch_no in range(0, n_iter, batch_size):
         # Repeat inputs batch_size times
-        X_tiled = tf.tile(tf.expand_dims(X, 0), [batch_size, 1, 1])
-        X_tiled = tf.reshape(X_tiled, (-1,) + X.shape[1:])
+        x_tiled = tf.tile(tf.expand_dims(x, 0), [batch_size, 1, 1])
+        x_tiled = tf.reshape(x_tiled, (-1,) + x.shape[1:])
 
         # Forward pass with dropout active
-        preds_chunk = dropout_forward(model, X_tiled)
+        preds_chunk = dropout_forward(model, x_tiled)
 
         # Reshape to (batch_size, batch_size)
-        preds_chunk = tf.reshape(preds_chunk, (batch_size, X.shape[0]))
+        preds_chunk = tf.reshape(preds_chunk, (batch_size, x.shape[0]))
         preds.append(preds_chunk)
 
     # Combine all chunks → shape (n_iter, batch_size)
@@ -327,12 +334,16 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1,
         return central.numpy() if isinstance(central, tf.Tensor) else central, \
             spread.numpy() if isinstance(spread, tf.Tensor) else spread
 
-    elif reduction == "median":
+    elif reduction == "median_mad":
         central = np.median(preds.numpy().flatten(), axis=0)
-        #spread = mad(preds.numpy(), axis=0)
+        spread = mad(preds.numpy(), axis=0)
+        return central.numpy() if isinstance(central, tf.Tensor) else central, \
+            spread.numpy() if isinstance(spread, tf.Tensor) else spread
+
+    elif reduction == "median_pc":
+        central = np.median(preds.numpy().flatten(), axis=0)
         spread_low = np.percentile(preds.numpy().flatten(), 5, axis=0)
         spread_high = np.percentile(preds.numpy().flatten(), 95, axis=0)
-        #spread = [spread_low, spread_high]
         return central.numpy() if isinstance(central, tf.Tensor) else central, \
             spread_low.numpy() if isinstance(spread_low,
                                              tf.Tensor) else spread_low, \
@@ -340,14 +351,15 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1,
                                               tf.Tensor) else spread_high
 
     else:
-        raise ValueError("reduction must be 'mean' or 'median'")
+        raise ValueError("reduction must be 'mean', 'median_mad',"
+                         + " or 'median_pc'")
 
 
 # -------------------------------
 # 8. Pipeline
 # -------------------------------
 def run_pipeline():
-    """Train, validate, and predict ANN."""
+    """Run pipeline for ANN training, validation, and prediction."""
     # --- Load data
     climate = load_climate()
     consumption = load_consumption()
@@ -357,40 +369,40 @@ def run_pipeline():
     df["Date"] = pd.to_datetime(df["Date"])
     df = reindex_sources(df)
     df = add_features(df)
-    df = add_lag_roll(df)
+    df = add_lag_roll(df, lags=[1, 2, 7, 14], windows=[3, 7, 14])
     df = df.dropna().reset_index(drop=True)
 
     feature_cols = ([
         "Temp_Mean", "Temp_Min", "Temp_Max", "Dewpoint_Mean", "Dewpoint_Min",
         "Dewpoint_Max", "U_Wind_Mean", "V_Wind_Mean", "Precipitation_Sum",
         "Snowfall_Sum", "SnowCover_Mean", "Temp_dew_diff", "wind_speed",
-        "precip_snow_ratio"] + 
-        [c for c in df.columns if c.startswith("lag_") or c.startswith("roll_")]
-        )
+        "precip_snow_ratio"] + [c for c in df.columns if
+                                c.startswith("lag_") or c.startswith("roll_")]
+    )
 
-    X, y = df[feature_cols], df["kwh"].values
+    x, y = df[feature_cols], df["kwh"].values
 
     # --- Scale & split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-        )
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.2, random_state=42
+    )
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
 
     # --- Train model
-    model = build_mlp(X_train.shape[1])
+    model = build_mlp(x_train.shape[1])
     es = callbacks.EarlyStopping(monitor="val_loss", patience=5,
                                  restore_best_weights=True, verbose=0)
     lr = callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5,
                                      patience=3, min_lr=1e-6, verbose=0)
 
-    model.fit(X_train, y_train, validation_data=(X_test, y_test),
+    model.fit(x_train, y_train, validation_data=(x_test, y_test),
               epochs=100, batch_size=256, callbacks=[es, lr], verbose=0)
 
     # --- Evaluate
-    y_pred_train = np.maximum(0, model.predict(X_train).flatten())
-    y_pred_test = np.maximum(0, model.predict(X_test).flatten())
+    y_pred_train = np.maximum(0, model.predict(x_train).flatten())
+    y_pred_test = np.maximum(0, model.predict(x_test).flatten())
 
     rmse_train = root_mean_squared_error(y_train, y_pred_train)
     rmse_test = root_mean_squared_error(y_test, y_pred_test)
@@ -404,7 +416,7 @@ def run_pipeline():
     plot_residuals(y_test, y_pred_test, "Test", zoom_limit=500)
 
     # --- Feature importance
-    importances_df = permutation_importance_manual(model, X_test, y_test,
+    importances_df = permutation_importance_manual(model, x_test, y_test,
                                                    feature_cols, n_repeats=5)
     print(importances_df.head(20))
 
@@ -423,7 +435,7 @@ def run_pipeline():
                             pd.to_datetime("2024-10-24"))
     extra_month = climate[
         (climate["Date"] >= start_date) & (climate["Date"] <= end_date)
-        ].copy()
+    ].copy()
     extra_month = add_features(extra_month)
 
     preds = []
@@ -441,39 +453,37 @@ def run_pipeline():
                 r[f"lag_{lag}"] = (
                     lag_hist.loc[
                         len(lag_hist) - lag, "kwh"
-                        ] if len(lag_hist) >= lag else np.nan
-                    )
+                    ] if len(lag_hist) >= lag else np.nan
+                )
             for w in [3, 7, 14]:
                 r[f"roll_mean_{w}"] = (
                     lag_hist["kwh"].iloc[-w:].mean()
                     if len(lag_hist) >= w else lag_hist["kwh"].mean()
-                    )
+                )
 
-            X_ex = pd.DataFrame([r])[feature_cols].fillna(0)
-            X_ex = scaler.transform(X_ex)
+            x_ex = pd.DataFrame([r])[feature_cols].fillna(0)
+            x_ex = scaler.transform(x_ex)
 
             # Monte Carlo Dropout predictions
-            if MC_MODE == 'median':
+            if MC_MODE == 'median_pc':
                 r["pred_kwh"], r["pred_pc5"], r["pred_pc95"] = (
-                    mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER,
+                    mc_dropout_predictions_parallel(model, x_ex, n_iter=NITER,
                                                     batch_size=ITERBATCH,
                                                     reduction=MC_MODE)
-                    )
+                )
             else:
                 r["pred_kwh"], r["pred_std"] = (
-                    mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER,
+                    mc_dropout_predictions_parallel(model, x_ex, n_iter=NITER,
                                                     batch_size=ITERBATCH,
                                                     reduction=MC_MODE)
-                    )
+                )
 
             lag_hist = pd.concat(
                 [lag_hist, pd.DataFrame([{"kwh": r["pred_kwh"]}])],
                 ignore_index=True
-                )
+            )
             rows.append(r)
-
         preds.append(pd.DataFrame(rows))
-
     preds_df = pd.concat(preds)
 
     # --- Save submission
@@ -501,7 +511,7 @@ def run_pipeline():
         ax.plot(df_src["Date"], df_src["kwh"], label="History", alpha=0.7)
         ax.plot(preds_src["Date"], preds_src["pred_kwh"], label="Forecast",
                 linestyle="--", alpha=0.8)
-        if MC_MODE == 'median':
+        if MC_MODE == 'median_pc':
             ax.fill_between(preds_src["Date"],
                             preds_src["pred_pc5"],
                             preds_src["pred_pc95"],
@@ -519,45 +529,47 @@ def run_pipeline():
     fig.suptitle(
         "Extra Month Predictions for 20 Random Sources (with Uncertainty)",
         fontsize=16
-        )
+    )
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    plt.savefig(os.path.join(PLOTS_DIR, "forecast_20_sources.png"))
+    plt.savefig(os.path.join(PLOTS_DIR, f"forecast_20_sources_{MC_MODE}.png"))
     plt.close()
 
-    for i, src in enumerate(sample_sources):
+    for src in sample_sources:
         df_src = df[df["Source"] == src].copy()
         preds_src = preds_df[preds_df["Source"] == src].copy()
 
         plt.figure(figsize=(12, 5))
         plt.plot(df_src["Date"], df_src["kwh"], label="Actual (history)",
                  alpha=0.7)
-        if MC_MODE == 'median':
+        if MC_MODE == 'median_pc':
             plt.fill_between(preds_src["Date"],
-                            preds_src["pred_pc5"],
-                            preds_src["pred_pc95"],
-                            color="orange", alpha=0.3)
+                             preds_src["pred_pc5"],
+                             preds_src["pred_pc95"],
+                             color="orange", alpha=0.3)
         else:
             plt.fill_between(preds_src["Date"],
-                            preds_src["pred_kwh"] - preds_src["pred_std"],
-                            preds_src["pred_kwh"] + preds_src["pred_std"],
-                            color="orange", alpha=0.3)
+                             preds_src["pred_kwh"] - preds_src["pred_std"],
+                             preds_src["pred_kwh"] + preds_src["pred_std"],
+                             color="orange", alpha=0.3)
         plt.plot(preds_src["Date"], preds_src["pred_kwh"],
                  label="Predicted (extra month)", linestyle="--", alpha=0.8)
-        plt.title(f"Electricity Consumption - device {src[16:18].strip('_')}," +
-                  f" user {src[-2:].lstrip('_')}", fontsize='large')
+        plt.title(f"Electricity Consumption - device {src[16:18].strip('_')},"
+                  + f" user {src[-2:].lstrip('_')}", fontsize='large')
         plt.xlabel("Date", fontsize='large')
         plt.ylabel("(kWh)", fontsize='large')
         plt.xticks(fontsize='large')
         plt.yticks(fontsize='large')
-        plt.legend(fontsize='large'); plt.tight_layout()
+        plt.legend(fontsize='large')
+        plt.tight_layout()
         plt.savefig(os.path.join(PLOTS_DIR,
-                                 f"forecast_device_{src[16:18].strip('_')}" +
-                                 f"_user_{src[-2:].lstrip('_')}.png"))
+                                 f"forecast_device_{src[16:18].strip('_')}"
+                                 + f"_user_{src[-2:].lstrip('_')}_"
+                                 + f"{MC_MODE}.png"))
         plt.close()
 
     # --- Plot total demand
     df_total = df.groupby("Date")["kwh"].sum().reset_index()
-    if MC_MODE == 'median':
+    if MC_MODE == 'median_pc':
         preds_total = preds_df.groupby("Date")[["pred_kwh",
                                                 "pred_pc95",
                                                 "pred_pc5"]].sum().reset_index()
@@ -568,49 +580,53 @@ def run_pipeline():
     plt.figure(figsize=(12, 5))
     plt.plot(df_total["Date"], df_total["kwh"], label="Actual Total (history)",
              alpha=0.7)
-    if MC_MODE == 'median':
+    if MC_MODE == 'median_pc':
         plt.fill_between(preds_total["Date"],
-                        preds_total["pred_pc5"],
-                        preds_total["pred_pc95"],
-                        color="orange", alpha=0.3)
+                         preds_total["pred_pc5"],
+                         preds_total["pred_pc95"],
+                         color="orange", alpha=0.3)
     else:
         plt.fill_between(preds_total["Date"],
-                        preds_total["pred_kwh"] - preds_total["pred_std"],
-                        preds_total["pred_kwh"] + preds_total["pred_std"],
-                        color="orange", alpha=0.3)
+                         preds_total["pred_kwh"] - preds_total["pred_std"],
+                         preds_total["pred_kwh"] + preds_total["pred_std"],
+                         color="orange", alpha=0.3)
     plt.plot(preds_total["Date"], preds_total["pred_kwh"],
              label="Predicted Total (extra month)", linestyle="--", alpha=0.8)
     plt.title("Total Electricity Consumption", fontsize='large')
-    plt.xlabel("Date", fontsize='large'); plt.ylabel("(kWh)", fontsize='large')
+    plt.xlabel("Date", fontsize='large')
+    plt.ylabel("(kWh)", fontsize='large')
     plt.xticks(fontsize='large')
     plt.yticks(fontsize='large')
-    plt.legend(fontsize='large'); plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, "forecast_total.png"))
+    plt.legend(fontsize='large')
+    plt.tight_layout()
+    plt.savefig(os.path.join(PLOTS_DIR, f"forecast_total_{MC_MODE}.png"))
     plt.close()
 
     # --- Plot total demand zoomed in around extra month
     plt.figure(figsize=(12, 5))
     plt.plot(df_total["Date"], df_total["kwh"], label="Actual Total (history)",
              alpha=0.7)
-    if MC_MODE == 'median':
+    if MC_MODE == 'median_pc':
         plt.fill_between(preds_total["Date"],
-                        preds_total["pred_pc5"],
-                        preds_total["pred_pc95"],
-                        color="orange", alpha=0.3)
+                         preds_total["pred_pc5"],
+                         preds_total["pred_pc95"],
+                         color="orange", alpha=0.3)
     else:
         plt.fill_between(preds_total["Date"],
-                        preds_total["pred_kwh"] - preds_total["pred_std"],
-                        preds_total["pred_kwh"] + preds_total["pred_std"],
-                        color="orange", alpha=0.3)
+                         preds_total["pred_kwh"] - preds_total["pred_std"],
+                         preds_total["pred_kwh"] + preds_total["pred_std"],
+                         color="orange", alpha=0.3)
     plt.plot(preds_total["Date"], preds_total["pred_kwh"],
              label="Predicted Total (extra month)", linestyle="--", alpha=0.8)
     plt.title("Total Electricity Consumption", fontsize='large')
-    plt.xlabel("Date", fontsize='large'); plt.ylabel("(kWh)", fontsize='large')
+    plt.xlabel("Date", fontsize='large')
+    plt.ylabel("(kWh)", fontsize='large')
     plt.xticks(fontsize='large')
     plt.yticks(fontsize='large')
-    plt.legend(fontsize='large'); plt.tight_layout()
-    plt.xlim(pd.to_datetime("2024-06-24"),pd.to_datetime("2024-10-24"))
-    plt.savefig(os.path.join(PLOTS_DIR, "forecast_total_window.png"))
+    plt.legend(fontsize='large')
+    plt.tight_layout()
+    plt.xlim(pd.to_datetime("2024-06-24"), pd.to_datetime("2024-10-24"))
+    plt.savefig(os.path.join(PLOTS_DIR, f"forecast_total_window_{MC_MODE}.png"))
     plt.close()
 
 
