@@ -148,6 +148,8 @@ pip install -r requirements.txt
 
 The Streamlit dashboard allows interactive exploration of model forecasts, historical hydropower data and values of the most important weather features.
 
+Source of original data: Zindi (CC BY-SA 4.0). The dataset contained here is a transformed and aggregated derivative and does not include original raw data.
+
 ### Steps
 
 1. Navigate to the `app/` directory and install its dependencies:
