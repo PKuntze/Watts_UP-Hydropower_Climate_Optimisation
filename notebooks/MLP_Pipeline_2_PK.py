@@ -48,9 +48,9 @@ def model_id_and_folders(base_dir, model_id):
 
     return model_id_i
 
-BASEDIR = "/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/"
+BASEDIR = "../"
 #MC_MODE = 'mean'
-MC_MODE = 'median'  ## PK: this appears to not suffer from negative spred?!
+MC_MODE = 'median'
 NITER = 1000
 ITERBATCH = 500
 #PREDICT_0_POWER = False
@@ -58,9 +58,9 @@ SAVEFILES = True
 MODELNAME = model_id_and_folders(BASEDIR, f"FP_MonteCarlo_percentiles_{MC_MODE}_niter{NITER}")
 #MODELNAME = model_id_and_folders(BASEDIR, "FP_test_sp_ratio_no_dir_StimesT")
 
-DATA_CONSUMPTION = BASEDIR+"data/Data.csv"
-DATA_CLIMATE = BASEDIR+"data/Kalam_Climate_Data.xlsx"
-DATA_SUBMISSION = BASEDIR+"data/SampleSubmission.csv"
+DATA_CONSUMPTION = BASEDIR+"notebooks/Data.csv"
+DATA_CLIMATE = BASEDIR+"notebooks/Kalam_Climate_Data.xlsx"
+DATA_SUBMISSION = BASEDIR+"notebooks/SampleSubmission.csv"
 OUTPUT_SUBMISSION = f"{BASEDIR}/submissions/{MODELNAME}/MySubmission_final_MLP_{MODELNAME}.csv"
 PLOTS_DIR = f"{BASEDIR}/plots/{MODELNAME}"
 MODELS_DIR = f"{BASEDIR}/models/{MODELNAME}"
@@ -274,11 +274,13 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1, reduction
     central : np.ndarray
         Mean or median predictions (shape = batch_size).
     spread : np.ndarray
-        Std or MAD uncertainty (shape = batch_size).
+        Std or MAD uncertainty (shape = batch_size). Using percentiles instead
+        avoids negative values.
     """
     preds = []
 
     for start in range(0, n_iter, batch_size):
+
         # Repeat inputs batch_size times
         X_tiled = tf.tile(tf.expand_dims(X, 0), [batch_size, 1, 1])
         X_tiled = tf.reshape(X_tiled, (-1,) + X.shape[1:])
@@ -294,21 +296,25 @@ def mc_dropout_predictions_parallel(model, X, n_iter=50, batch_size=1, reduction
     preds = tf.concat(preds, axis=0)
 
     if reduction == "mean":
-        central = tf.reduce_mean(preds, axis=0)
-        spread = tf.math.reduce_std(preds, axis=0)
+        central = tf.reduce_mean(preds.flatten(), axis=0)
+        spread = tf.math.reduce_std(preds.flatten(), axis=0)
+        return central.numpy() if isinstance(central, tf.Tensor) else central, \
+            spread.numpy() if isinstance(spread, tf.Tensor) else spread
 
     elif reduction == "median":
-        central = np.median(preds.numpy(), axis=0)
+        central = np.median(preds.numpy().flatten(), axis=0)
         #spread = mad(preds.numpy(), axis=0)
-        spread_low = np.percentile(preds.numpy(), 5, axis=0)
-        spread_high = np.percentile(preds.numpy(), 95, axis=0)
-        spread = [spread_low, spread_high]
+        spread_low = np.percentile(preds.numpy().flatten(), 5, axis=0)
+        spread_high = np.percentile(preds.numpy().flatten(), 95, axis=0)
+        #spread = [spread_low, spread_high]
+
+        return central.numpy() if isinstance(central, tf.Tensor) else central, \
+            spread_low.numpy() if isinstance(spread_low, tf.Tensor) else spread_low, \
+            spread_high.numpy() if isinstance(spread_high, tf.Tensor) else spread_high
 
     else:
         raise ValueError("reduction must be 'mean' or 'median'")
 
-    return central.numpy() if isinstance(central, tf.Tensor) else central, \
-           spread.numpy() if isinstance(spread, tf.Tensor) else spread
 
 # -------------------------------
 # 7. Pipeline
@@ -404,24 +410,26 @@ def run_pipeline():
         rows = []
 
         for _, row in future.iterrows():
-            r = row.to_dict()
-            for lag in [1, 2, 7, 14]:
-                r[f"lag_{lag}"] = lag_hist.loc[len(lag_hist) - lag, "kwh"] if len(lag_hist) >= lag else np.nan
-            for w in [3, 7, 14]:
-                r[f"roll_mean_{w}"] = lag_hist["kwh"].iloc[-w:].mean() if len(lag_hist) >= w else lag_hist["kwh"].mean()
+            rr = row.to_dict()
 
-            X_ex = pd.DataFrame([r])[feature_cols].fillna(0)
+            for lag in [1, 2, 7, 14]:
+                rr[f"lag_{lag}"] = lag_hist.loc[len(lag_hist) - lag, "kwh"] if len(lag_hist) >= lag else np.nan
+            for w in [3, 7, 14]:
+                rr[f"roll_mean_{w}"] = lag_hist["kwh"].iloc[-w:].mean() if len(lag_hist) >= w else lag_hist["kwh"].mean()
+
+            X_ex = pd.DataFrame([rr])[feature_cols].fillna(0)
             X_ex = scaler.transform(X_ex)
 
             # Monte Carlo Dropout predictions
             #mc_mean, mc_std = mc_dropout_predictions(model, X_ex, n_iter=50)
             if MC_MODE == 'median':
-                r["pred_kwh"], r["pred_pc5"], r["pred_pc95"] = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=ITERBATCH, reduction=MC_MODE)
+                rr["pred_kwh"], rr["pred_pc5"], rr["pred_pc95"] = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=ITERBATCH, reduction=MC_MODE)
             else:
-                r["pred_kwh"], r["pred_std"] = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=ITERBATCH, reduction=MC_MODE)
+                rr["pred_kwh"], rr["pred_std"] = mc_dropout_predictions_parallel(model, X_ex, n_iter=NITER, batch_size=ITERBATCH, reduction=MC_MODE)
 
-            lag_hist = pd.concat([lag_hist, pd.DataFrame([{"kwh": r["pred_kwh"]}])], ignore_index=True)
-            rows.append(r)
+            lag_hist = pd.concat([lag_hist, pd.DataFrame([{"kwh": rr["pred_kwh"]}])], ignore_index=True)
+            rows.append(rr)
+
         preds.append(pd.DataFrame(rows))
 
     preds_df = pd.concat(preds)
@@ -487,12 +495,12 @@ def run_pipeline():
         plt.figure(figsize=(12, 5))
         plt.plot(df_src["Date"], df_src["kwh"], label="Actual (history)", alpha=0.7)
         if MC_MODE == 'median':
-            ax.fill_between(preds_src["Date"],
+            plt.fill_between(preds_src["Date"],
                             preds_src["pred_pc5"],
                             preds_src["pred_pc95"],
                             color="orange", alpha=0.3)
         else:
-            ax.fill_between(preds_src["Date"],
+            plt.fill_between(preds_src["Date"],
                             preds_src["pred_kwh"] - preds_src["pred_std"],
                             preds_src["pred_kwh"] + preds_src["pred_std"],
                             color="orange", alpha=0.3)
@@ -507,17 +515,23 @@ def run_pipeline():
         
     # --- Plot total demand
     df_total = df.groupby("Date")["kwh"].sum().reset_index()
-    preds_total = preds_df.groupby("Date")[["pred_kwh", "pred_std"]].sum().reset_index()
+    if MC_MODE == 'median':
+        preds_total = preds_df.groupby("Date")[["pred_kwh",
+                                                "pred_pc95",
+                                                "pred_pc5"]].sum().reset_index()
+    else:
+        preds_total = preds_df.groupby("Date")[["pred_kwh",
+                                                "pred_std"]].sum().reset_index()
 
     plt.figure(figsize=(12, 5))
     plt.plot(df_total["Date"], df_total["kwh"], label="Actual Total (history)", alpha=0.7)
     if MC_MODE == 'median':
-        ax.fill_between(preds_total["Date"],
+        plt.fill_between(preds_total["Date"],
                         preds_total["pred_pc5"],
                         preds_total["pred_pc95"],
                         color="orange", alpha=0.3)
     else:
-        ax.fill_between(preds_total["Date"],
+        plt.fill_between(preds_total["Date"],
                         preds_total["pred_kwh"] - preds_total["pred_std"],
                         preds_total["pred_kwh"] + preds_total["pred_std"],
                         color="orange", alpha=0.3)
@@ -533,12 +547,12 @@ def run_pipeline():
     plt.figure(figsize=(12, 5))
     plt.plot(df_total["Date"], df_total["kwh"], label="Actual Total (history)", alpha=0.7)
     if MC_MODE == 'median':
-        ax.fill_between(preds_total["Date"],
+        plt.fill_between(preds_total["Date"],
                         preds_total["pred_pc5"],
                         preds_total["pred_pc95"],
                         color="orange", alpha=0.3)
     else:
-        ax.fill_between(preds_total["Date"],
+        plt.fill_between(preds_total["Date"],
                         preds_total["pred_kwh"] - preds_total["pred_std"],
                         preds_total["pred_kwh"] + preds_total["pred_std"],
                         color="orange", alpha=0.3)

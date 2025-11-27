@@ -1,112 +1,196 @@
-# ds-modeling-pipeline
+# 🌊 Hydropower Forecasting with Machine Learning
+IBM SkillsBuild Hydropower Climate Optimisation Challenge [Zindi Africa](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge)
 
-Here you find a Skeleton project for building a simple model in a python script or notebook and log the results on MLFlow.
+This document outlines our team’s approach to improving hydropower generation forecasts for off-grid communities using climate data and machine learning. Reliable hydropower predictions can enhance local energy planning and guide infrastructure optimization.
 
-There are two ways to do it: 
-* In Jupyter Notebooks:
-    We train a simple model in the [jupyter notebook](notebooks/EDA-and-modeling.ipynb), where we select only some features and do minimal cleaning. The hyperparameters of feature engineering and modeling will be logged with MLflow
+We compared several time-series forecasting methods, evaluating their RMSE against benchmark submissions from other participants in the challenge. The three most promising models were:
 
-* With Python scripts:
-    The [main script](modeling/train.py) will go through exactly the same process as the jupyter notebook and also log the hyperparameters with MLflow
+- **Multilayer Perceptron (MLP)** — a deep neural network with dropout layers and Monte Carlo uncertainty estimation.
+- **LightGBM** 
+- **Prophet** — a time-series model developed by Meta, well-suited for capturing seasonality and long-term trends.
 
-Data used is the [coffee quality dataset](https://github.com/jldbc/coffee-quality-database).
+The MLP achieved the best performance with a Private Leaderboard **RMSE of 4.24**, which would have ranked first if the challenge were still open.
 
-## Requirements:
+This repository allows users to reproduce the training pipeline and explore forecasts via a Streamlit dashboard. It includes data preprocessing, exploratory analysis, modeling, and evaluation.
 
-- pyenv with Python: 3.11.3
+🔑 **Key Elements**:
 
-### Setup
+- Feature Engineering: Lagged, rolling, and climate-based features to represent temporal and environmental dependencies.
+- Recursive Prediction: Multi-step forecasting by iteratively feeding model outputs back as new inputs.
+- Uncertainty Estimation: Monte Carlo Dropout in the MLP to generate confidence intervals for each prediction.
+- Model Comparison: Evaluation of MLP, LightGBM, and Prophet using RMSE on training, testing, and unseen (extra month) datasets.
 
-Use the requirements file in this repo to create a new environment.
 
-```BASH
-make setup
 
-#or
+---
 
-pyenv local 3.11.3
-python -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements_dev.txt
+## 📂 Repository Structure
+<details>
+  <summary>Structure Visualization</summary>
+    
+  ```
+project-name/
+├── README.md                   <- Project overview and usage
+├── requirements.txt            <- Main Python dependencies
+├── .gitignore                  <- Ignored files for git
+│
+├── notebooks/                  <- Explanatory notebooks (EDA & baseline only)
+│   ├── 01_data_preparation_and_exploration.ipynb
+│   ├── 02_naive_baseline_model.ipynb
+│   ├── 03_LightGBM_model_test.ipynb
+│   ├── 04_Prophet_model_test.ipynb
+│   ├── 05_ANN_model_test.ipynb
+│   └── 06_XGBoost_model_test.ipynb
+│
+├── src/ 
+│   ├── data/                   <- Not shared publicly
+│   ├── model/
+│   │   └── ANN.py              <- Winning model python script
+│   ├── plots/
+│   │   └── ANN_median_pc_niter1000_batch500_1/    <- Folder dynamically created by ANN.py
+│   │       ├── feature_importance.png
+│   │       ...                                    <- Various plots for validation and prediction
+│   │       └── residuals_scatter_Train.png
+│   └── submissions             <- Not shared publicly
+│
+├── app/                        <- Interactive Streamlit application
+│   ├── __init__.py
+│   ├── streamlit_app.py
+│   ├── requirements.txt        <- App-specific dependencies
+│   ├── data/
+│   │   ├── __init__.py
+│   │   └── data.csv
+│   ├── pages/
+│   │   ├── __init__.py
+│   │   └── page1.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── data_processing.py
+│   │   └── visualization.py
+│   └── images/
+│       ├── __init__.py
+│       └── logo.png
+│
+└── reports/
+      └── WattsUp_Capstone_Presentation.pdf    <- Capstone presentation of Bootcamp
+  ```
+</details>
+
+### Data
+
+The data originates from the [the IBM SkillsBuild Hydropower Climate Optimisation Challenge.](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge/data) 
+
+- Data.zip - contains the hydropower generation data (energy output per source).
+
+- Climate Data.zip - contains the daily weather and environmental variables.
+
+- SampleSubmission.csv - template for final submission format.
+
+### Notebooks 
+- **0_preprocessing.ipynb** - demonstrates data cleaning steps.  
+- **1_exploration.ipynb** - exploratory analysis and visualization.  
+- **2_time_series_decomp.ipynb** - seasonal/trend decomposition.  
+- **3_naive_baseline_model.ipynb** - simple baseline for benchmarking.  
+- **04_LightGBM_model_test.ipynb.ipynb**
+- **05_Prophet_model_test.ipynb**
+- **06_ANN_model_test.ipynb**
+- **07_XGBoost_model_test.ipynb**
+
+
+### Models (`src/models/`) 
+- `Prophet.ipynb` – Prophet model implementation  
+- `ANN.ipynb` – Neural network model  
+- `LightGBM.ipynb` – Gradient boosting model  
+- `train_utils.py` – shared functions for training/evaluation  
+
+### Visualizations (`src/visualization/`)
+- Custom plots in `plots.py`.  
+- Figures stored in `reports/figures/`.
+
+### Streamlit app
+Interactive dashboard for visualizing MLP model predictions vor individual households (users).
+
+### Reports
+Contains generated figures and documentation related to model evaluation and results.
+---
+
+## ⚙️ Setup
+
+Follow these steps to set up and run the project locally.
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/<your-username>/<repo-name>.git
+cd <repo-name>
 ```
 
-The `requirements.txt` file contains the libraries needed for deployment.. of model or dashboard .. thus no jupyter or other libs used during development.
+### 2. Create a virtual environment
 
-The MLFLOW URI should **not be stored on git**, you have two options, to save it locally in the `.mlflow_uri` file:
-
-```BASH
-echo http://127.0.0.1:5000/ > .mlflow_uri
-```
-
-This will create a local file where the uri is stored which will not be added on github (`.mlflow_uri` is in the `.gitignore` file). Alternatively you can export it as an environment variable with
+Recommended Python version 3.11.3
 
 ```bash
-export MLFLOW_URI=http://127.0.0.1:5000/
+python -m venv venv
+# Activate environment
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
 ```
 
-This links to your local mlflow, if you want to use a different one, then change the set uri.
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-The code in the [config.py](modeling/config.py) will try to read it locally and if the file doesn't exist will look in the env var.. IF that is not set the URI will be empty in your code.
 
-## Usage
 
-### Creating an MLFlow experiment
+---
 
-You can do it via the GUI or via [command line](https://www.mlflow.org/docs/latest/tracking.html#managing-experiments-and-runs-with-the-tracking-service-api) if you use the local mlflow:
+## 🚀 Running the Streamlit App
+
+The Streamlit dashboard allows interactive exploration of model forecasts, historical hydropower data and values of the most important weather features.
+
+### Steps
+
+1. Navigate to the `app/` directory and install its dependencies:
 
 ```bash
-mlflow experiments create --experiment-name 0-template-ds-modeling
+cd app
 ```
-
-Check your local mlflow
+2. Launch the app:
 
 ```bash
-mlflow ui
+streamlit run streamlit_app.py
 ```
 
-and open the link [http://127.0.0.1:5000](http://127.0.0.1:5000)
+This launches an interactive dashboard with multiple pages, powered by data in `app/data/`. This data contains a merged dataset that combines:
 
-This will throw an error if the experiment already exists. **Save the experiment name in the [config file](modeling/config.py).**
+* Model predictions (from the trained MLP)
+* Training data with historical hydropower and climate variables
 
-In order to train the model and store test data in the data folder and the model in models run:
+---
 
-```bash
-#activate env
-source .venv/bin/activate
+## 📑 Reports
 
-python -m modeling.train
-```
+- **Figures** → `reports/figures/`  
+- **Presentation slides** → `reports/Presentation.pptx`  
 
-In order to test that predict works on a test set you created run:
+---
 
-```bash
-python modeling/predict.py models/linear data/X_test.csv data/y_test.csv
-```
+## 📌 Notes
 
-## About MLFLOW -- delete this when using the template
+- `src/` contains the authoritative code for reproducibility.  
+- `notebooks/` are explanatory and showcase data preparation, EDA, and baseline results.  
+- Use `configs/config.yaml` for project settings (paths, parameters).  
+- Raw data should **not** be committed to GitHub.  
 
-MLFlow is a tool for tracking ML experiments. You can run it locally or remotely. It stores all the information about experiments in a database.
-And you can see the overview via the GUI or access it via APIs. Sending data to mlflow is done via APIs. And with mlflow you can also store models on S3 where you version them and tag them as production for serving them in production.
-![mlflow workflow](images/0_general_tracking_mlflow.png)
+---
 
-### MLFlow GUI
+## ✨ Authors
 
-You can group model trainings in experiments. The granularity of what an experiment is up to your usecase. Recommended is to have an experiment per data product, as for all the runs in an experiment you can compare the results.
-![gui](images/1_gui.png)
+This project was developed collaboratively by the entire project team.  
+**All members contributed equally to every stage of the project, including data preparation, modeling, visualization, app development, and reporting.**
 
-### Code to send data to MLFlow
-
-In order to send data about your model you need to set the connection information, via the tracking uri and also the experiment name (otherwise the default one is used). One run represents a model, and all the rest is metadata. For example if you want to save train MSE, test MSE and validation MSE you need to name them as 3 different metrics.
-If you are doing CV you can set the tracking as nested.
-![mlflow code](images/2_code.png)
-
-### MLFlow metadata
-
-There is no constraint between runs to have the same metadata tracked. I.e. for one run you can track different tags, different metrics, and different parameters (in cv some parameters might not exist for some runs so this .. makes sense to be flexible).
-
-- tags can be anything you want.. like if you do CV you might want to tag the best model as "best"
-- params are perfect for hypermeters and also for information about the data pipeline you use, if you scaling vs normalization and so on
-- metrics.. should be numeric values as these can get plotted
-
-![mlflow metadata](images/3_metadata.png)
+- Noé Espinosa-Novo
+- Gozal Jabrayilova 
+- Patrick Kuntze
+- Bernd Hermann
+- Florencia Perachia

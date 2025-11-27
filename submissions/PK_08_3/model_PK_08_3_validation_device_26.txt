@@ -1,2 +1,0 @@
-MLP_PK_08_3 + Huber (train): RMSE=0.825, MAPE=0.209
-MLP_PK_08_3 + Huber (test):  RMSE=0.931, MAPE=0.206

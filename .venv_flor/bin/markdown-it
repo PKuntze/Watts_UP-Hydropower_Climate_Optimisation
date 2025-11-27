@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #!/Users/patrickkuntze/01-Arbeit/Jobsuche/05_Weiterbildungen/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/.venv_flor/bin/python
+=======
+#!/Users/patrickkuntze/Desktop/DS_bootcamp/Capstone/Watts_UP-Hydropower_Climate_Optimisation/.venv_flor/bin/python
+>>>>>>> 3aa56afc46520fa510185fbeed6df8da97722e18
 import sys
 from markdown_it.cli.parse import main
 if __name__ == '__main__':
