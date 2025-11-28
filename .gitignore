@@ -140,12 +140,6 @@ data/Data.zip
 data/*.xlsx
 models/*.sav
 mlruns
-models/*
-plots/*
-submissions/*
-models/
-plots/
-submissions/
 Streamlit/
 Stramlit/*
 scratch/
