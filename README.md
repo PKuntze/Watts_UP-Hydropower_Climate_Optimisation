@@ -45,7 +45,7 @@ project-name/
 ├── src/ 
 │   ├── data/                   <- Not shared publicly
 │   ├── model/
-│   │   └── ANN.py              <- Winning model python script
+│   │   └── ANN.py              <- Winning model
 │   ├── plots/
 │   │   └── ANN_median_pc_niter1000_batch500_1/    <- Folder dynamically created by ANN.py
 │   │       ├── feature_importance.png
@@ -57,19 +57,14 @@ project-name/
 │   ├── __init__.py
 │   ├── streamlit_app.py
 │   ├── requirements.txt        <- App-specific dependencies
+│   ├── .streamlit/
+│   │   └── config.toml
 │   ├── data/
-│   │   ├── __init__.py
-│   │   └── data.csv
-│   ├── pages/
-│   │   ├── __init__.py
-│   │   └── page1.py
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── data_processing.py
-│   │   └── visualization.py
+│   │   └── Streamlit_Input.csv <- 
 │   └── images/
-│       ├── __init__.py
-│       └── logo.png
+│       ├── Kalam-Vallay.jpg
+│       ...                     <- Various images used in the app
+│       └── stream.jpg
 │
 └── reports/
       └── WattsUp_Capstone_Presentation.pdf    <- Capstone presentation of Bootcamp
@@ -87,21 +82,16 @@ The data originates from the [the IBM SkillsBuild Hydropower Climate Optimisatio
 - SampleSubmission.csv - template for final submission format.
 
 ### Notebooks 
-- **0_preprocessing.ipynb** - demonstrates data cleaning steps.  
-- **1_exploration.ipynb** - exploratory analysis and visualization.  
-- **2_time_series_decomp.ipynb** - seasonal/trend decomposition.  
-- **3_naive_baseline_model.ipynb** - simple baseline for benchmarking.  
-- **04_LightGBM_model_test.ipynb.ipynb**
-- **05_Prophet_model_test.ipynb**
-- **06_ANN_model_test.ipynb**
-- **07_XGBoost_model_test.ipynb**
+- **01_data_preparation_and_exploration.ipynb** - demonstrates data cleaning, aggregation and exploration.  
+- **02_naive_baseline_model.ipynb** - simple baseline for benchmarking.  
+- **03_LightGBM_model_test.ipynb** - decision tree ensemble method based on building a strong learner by adding weak learners using gradient descent.  
+- **04_Prophet_model_test.ipynb** - Metas Prophet model, time series model method using decomposition.  
+- **06_ANN_model_test.ipynb** - deep learning artificial neural network with dense layers and monte carlo drop outs.
+- **07_XGBoost_model_test.ipynb** - decision tree ensemble method based on sequential weak learners correcting errors of the previous one.
 
 
 ### Models (`src/models/`) 
-- `Prophet.ipynb` – Prophet model implementation  
-- `ANN.ipynb` – Neural network model  
-- `LightGBM.ipynb` – Gradient boosting model  
-- `train_utils.py` – shared functions for training/evaluation  
+- `ANN.ipynb` – single callable python script based on 06_ANN_model_test.ipynb
 
 ### Visualizations (`src/visualization/`)
 - Custom plots in `plots.py`.  
