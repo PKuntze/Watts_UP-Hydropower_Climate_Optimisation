@@ -82,12 +82,12 @@ The data originates from the [the IBM SkillsBuild Hydropower Climate Optimisatio
 - SampleSubmission.csv - template for final submission format.
 
 ### Notebooks 
-- **01_data_preparation_and_exploration.ipynb** - demonstrates data cleaning, aggregation and exploration.  
-- **02_naive_baseline_model.ipynb** - simple baseline for benchmarking.  
-- **03_LightGBM_model_test.ipynb** - decision tree ensemble method based on building a strong learner by adding weak learners using gradient descent.  
-- **04_Prophet_model_test.ipynb** - Metas Prophet model, time series model method using decomposition.  
-- **06_ANN_model_test.ipynb** - deep learning artificial neural network with dense layers and monte carlo drop outs.
-- **07_XGBoost_model_test.ipynb** - decision tree ensemble method based on sequential weak learners correcting errors of the previous one.
+- `01_data_preparation_and_exploration.ipynb` - demonstrates data cleaning, aggregation and exploration.  
+- `02_naive_baseline_model.ipynb` - simple baseline for benchmarking.  
+- `03_LightGBM_model_test.ipynb` - decision tree ensemble method based on building a strong learner by adding weak learners using gradient descent.  
+- `04_Prophet_model_test.ipynb` - Metas Prophet model, time series model method using decomposition.  
+- `06_ANN_model_test.ipynb` - deep learning artificial neural network with dense layers and monte carlo drop outs.
+- `07_XGBoost_model_test.ipynb` - decision tree ensemble method based on sequential weak learners correcting errors of the previous one.
 
 
 ### Models (`src/models/`) 
