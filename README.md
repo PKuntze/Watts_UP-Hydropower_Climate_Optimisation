@@ -136,6 +136,8 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
+
+
 ---
 
 ## 🚀 Running the Streamlit App
@@ -162,13 +164,26 @@ This launches an interactive dashboard with multiple pages, powered by data in `
 * Model predictions (from the trained MLP)
 * Training data with historical hydropower and climate variables
 
+
+
 ---
 
 ## 📌 Notes
 
 - `src/` contains the authoritative code for reproducibility.  
 - `notebooks/` are explanatory and showcase data preparation, EDA, and baseline results.  
-- Raw data should **not** be committed to GitHub.  
+- Raw data should **not** be committed to GitHub.
+
+
+
+---
+
+## 🤝 Acknowledgements
+
+- This work was done under the capstone project of the Data Science, Machine Learning, and AI bootcamp by [neuefische GmbH](https://www.neuefische.de).
+- The data science challenge [IBM SkillsBuild Hydropower Climate Optimisation Challenge](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge) is provided by [Zindi Africa](https://zindi.africa) under CC-BY-SA 4.0 licence.
+
+
 
 ---
 
