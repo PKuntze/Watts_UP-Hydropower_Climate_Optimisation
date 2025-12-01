@@ -180,7 +180,7 @@ This launches an interactive dashboard with multiple pages, powered by data in `
 
 ## 🤝 Acknowledgements
 
-- This work was done under the capstone project of the Data Science, Machine Learning, and AI bootcamp by [neuefische GmbH](https://www.neuefische.de).
+- This work was done under the capstone project of the "Data Science, Machine Learning, and AI" bootcamp by [neuefische GmbH](https://www.neuefische.de).
 - The data science challenge [IBM SkillsBuild Hydropower Climate Optimisation Challenge](https://zindi.africa/competitions/ibm-skillsbuild-hydropower-climate-optimisation-challenge) is provided by [Zindi Africa](https://zindi.africa) under CC-BY-SA 4.0 licence.
 
 
