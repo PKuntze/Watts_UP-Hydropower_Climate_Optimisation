@@ -125,10 +125,10 @@ cd <repo-name>
 Recommended Python version 3.11.3
 
 ```bash
-python -m venv venv
+python -m venv .venv
 # Activate environment
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+source .venv/bin/activate  # Linux/Mac
+.venv\Scripts\activate     # Windows/PowerShell
 ```
 
 ### 3. Install dependencies
